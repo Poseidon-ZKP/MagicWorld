@@ -1,6 +1,6 @@
 // game ShowHand listener
 
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, EventFilter, ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import { useProvider } from 'wagmi';
 import { getLogPrams } from '../utils/contracts';
@@ -61,7 +61,7 @@ function useEvent({
       interval = setInterval(async () => {
         const logs = await provider.getLogs(
           getLogPrams({
-            filter: filter,
+            filter: filter as EventFilter,
             address: contract?.address,
             provider: provider,
           })

@@ -167,7 +167,7 @@ export default function Home() {
   if (!creator || !joiner) {
     return (
       <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
-        <div className="text-2xl font-medium">Don't find creator or joiner</div>
+        <div className="text-2xl font-medium">no creator or joiner</div>
         <div className="text-2xl font-medium text-pink-500">
           Please add them on URL
         </div>

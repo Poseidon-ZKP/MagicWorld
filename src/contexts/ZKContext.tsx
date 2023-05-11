@@ -140,8 +140,8 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
           plaintext_output.delta0,
           plaintext_output.delta1,
           plaintext_output.selector,
-          shuffleEncryptWasmData,
-          shuffleEncryptZkeyData
+          shuffleEncryptWasmData as string,
+          shuffleEncryptZkeyData as string
         );
         let solidityProof: SolidityProof = packToSolidityProof(
           shuffleEncryptOutput.proof
@@ -189,8 +189,8 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
         Y,
         sk,
         pk,
-        decryptWasmData,
-        decryptZkeyData
+        decryptWasmData as string,
+        decryptZkeyData as string
       );
 
       let solidityProof: SolidityProof = packToSolidityProof(
@@ -209,9 +209,6 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
   const generateShowHandData = useCallback(
     async (sk: bigint, pk: bigint[], card: any) => {
       try {
-        console.log('generateShowHandData', sk, pk, card);
-        console.log('decryptWasmData', decryptWasmData);
-        console.log('decryptZkeyData', decryptZkeyData);
         let decryptProof = await generateDecryptProof(
           [
             card[0].toBigInt(),
@@ -221,8 +218,8 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
           ],
           sk,
           pk,
-          decryptWasmData,
-          decryptZkeyData
+          decryptWasmData as string,
+          decryptZkeyData as string
         );
         let solidityProof: SolidityProof = packToSolidityProof(
           decryptProof.proof
@@ -283,10 +280,10 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
         // generate!
         const proof = await generateDecryptProof(
           Y,
-          myKey.sk,
-          myKey.pk,
-          decryptWasmData,
-          decryptZkeyData
+          myKey.sk as bigint,
+          myKey.pk as bigint[],
+          decryptWasmData as string,
+          decryptZkeyData as string
         );
         return proof;
       } catch (e) {
@@ -340,5 +337,7 @@ export const ZKContextProvider = ({ children }: { children: ReactNode }) => {
     generateShowHandData,
     genDecryptProofLocally,
   };
-  return <ZKContext.Provider value={state}>{children}</ZKContext.Provider>;
+  return (
+    <ZKContext.Provider value={state as any}>{children}</ZKContext.Provider>
+  );
 };

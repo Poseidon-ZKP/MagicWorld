@@ -33,9 +33,9 @@ function Index({
             buttonRender()
           ) : (
             <Button
-              isSuccess={buttonStatus.isSuccess}
-              isLoading={buttonStatus.isLoading}
-              isError={buttonStatus.isError}
+              isSuccess={buttonStatus?.isSuccess}
+              isLoading={buttonStatus?.isLoading}
+              isError={buttonStatus?.isError}
               {...buttonProps}
             >
               {buttonProps?.children}
