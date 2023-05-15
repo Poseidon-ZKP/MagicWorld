@@ -5,9 +5,9 @@ interface Option<Params> {
   wait?: boolean;
 }
 
-function useTransaction<Params = any, Response = any>(
+function useWriteContract<Params = any, Response = any>(
   method: ((...args: Params[]) => Promise<Response>) | any,
-  { args = [], wait = false }: Option<Params>
+  { args = [], wait = true }: Option<Params>
 ) {
   const [result, setResult] = useState<Response>();
   const [isError, setIsError] = useState<boolean>(false);
@@ -54,4 +54,4 @@ function useTransaction<Params = any, Response = any>(
   };
 }
 
-export default useTransaction;
+export default useWriteContract;

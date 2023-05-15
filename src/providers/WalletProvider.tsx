@@ -19,7 +19,7 @@ const { chains, provider } = configureChains(chainsParams, [
       http: `https://endpoints.omniatech.io/v1/arbitrum/goerli/public`,
     }),
   }),
-  alchemyProvider({ apiKey: '3G7hlGqp_3AyP4XspL_vMa5nJTpwKIxT' }),
+  // alchemyProvider({ apiKey: '3G7hlGqp_3AyP4XspL_vMa5nJTpwKIxT' }),
   // infuraProvider({ apiKey: 'b45700eac1464695b569b4151c36b672' }),
   publicProvider(),
 ]);
