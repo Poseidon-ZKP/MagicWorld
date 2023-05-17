@@ -3,7 +3,7 @@
 import { BigNumber, EventFilter, ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import { useProvider } from 'wagmi';
-import { getLogPrams } from '../utils/contracts';
+import { getLogParams } from '../utils/contracts';
 
 export interface UseEventProps {
   contract: any;
@@ -41,12 +41,10 @@ function useEvent({
   const listener = async (...args: any[]) => {
     try {
       console.log('args', args);
-      if (!gameId || gameId == args[0].toString()) {
-        if (args[addressIndex] === creator) {
-          setCreatorValue(args);
-        } else if (args[addressIndex] === joiner) {
-          setJoinerValue(args);
-        }
+      if (args[addressIndex] === creator) {
+        setCreatorValue(args);
+      } else if (args[addressIndex] === joiner) {
+        setJoinerValue(args);
       }
     } catch (error) {
       console.log(error, error);
@@ -56,11 +54,10 @@ function useEvent({
   useEffect(() => {
     let interval: string | number | NodeJS.Timer | null | undefined = null;
     if (!contract) return;
-
     if (!isStop) {
       interval = setInterval(async () => {
         const logs = await provider.getLogs(
-          getLogPrams({
+          getLogParams({
             filter: filter as EventFilter,
             address: contract?.address,
             provider: provider,

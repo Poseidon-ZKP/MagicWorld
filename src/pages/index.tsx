@@ -7,21 +7,24 @@ import { arbitrumGoerli } from 'wagmi/chains';
 
 import StatusItem from '../components/StatusItem';
 import { useWrites } from '../hooks/useWrites';
+import useGame, { IGameStatus } from '../hooks/useGame';
 
 export default function Home() {
   const { connect, connectors } = useConnect();
 
   const router = useRouter();
+
+  const creator = router?.query?.creator as string;
+  const joiner = router?.query?.joiner as string;
+
   const { chain } = useNetwork();
   const { address } = useAccount();
-  const { createGameStatus } = useWrites();
+  const { createGameStatus, joinGameStatus } = useWrites();
 
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
-
-  const creator = router?.query?.creator as string;
-  const joiner = router?.query?.joiner as string;
+  const { shuffleId, hiloId, gameStatus } = useGame(creator, joiner, address);
 
   if (!router.isReady) {
     return (
@@ -92,19 +95,21 @@ export default function Home() {
                 Creator Address:{creator ? formatAddress(creator) : '--'}
               </h2>
               <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5">
-                <StatusItem
-                  label={'Create Status:'}
-                  statusLabel={'Created'}
-                  isShowText={createGameStatus.isSuccess}
-                  uiStatus={!createGameStatus.isSuccess}
-                  buttonStatus={createGameStatus}
-                  buttonProps={{
-                    onClick: async () => {
-                      await createGameStatus?.run();
-                    },
-                    children: 'Start game',
-                  }}
-                />
+                {gameStatus == IGameStatus.WAIT_START && (
+                  <StatusItem
+                    label={'Create Status:'}
+                    statusLabel={'Created'}
+                    isShowText={createGameStatus.isSuccess}
+                    uiStatus={!createGameStatus.isSuccess}
+                    buttonStatus={createGameStatus}
+                    buttonProps={{
+                      onClick: async () => {
+                        await createGameStatus?.run();
+                      },
+                      children: 'Start game',
+                    }}
+                  />
+                )}
               </dl>
               {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
                   <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">
@@ -122,7 +127,21 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-slate-900 pt-4 pb-2 px-4 sm:px-6 lg:px-4 xl:px-6 dark:text-slate-100 transition-opacity duration-[1.5s] delay-500 ">
                 Joiner Address: {joiner ? formatAddress(joiner) : '--'}
               </h2>
-              <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5"></dl>
+              <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5">
+                <StatusItem
+                  label={'Join Status:'}
+                  statusLabel={'Joined'}
+                  isShowText={joinGameStatus.isSuccess}
+                  uiStatus={!joinGameStatus.isSuccess}
+                  buttonStatus={joinGameStatus}
+                  buttonProps={{
+                    onClick: async () => {
+                      await joinGameStatus?.run(shuffleId);
+                    },
+                    children: 'Join game',
+                  }}
+                />
+              </dl>
               {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
                   <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">
                     Decline
