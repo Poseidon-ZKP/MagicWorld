@@ -8,6 +8,8 @@ import { arbitrumGoerli } from 'wagmi/chains';
 import StatusItem from '../components/StatusItem';
 import { useWrites } from '../hooks/useWrites';
 import useGame, { IGameStatus } from '../hooks/useGame';
+import useZkShuffle from '../hooks/useZkShuffle';
+import Button from '../components/Button';
 
 export default function Home() {
   const { connect, connectors } = useConnect();
@@ -19,8 +21,8 @@ export default function Home() {
 
   const { chain } = useNetwork();
   const { address } = useAccount();
-  const { createGameStatus, joinGameStatus } = useWrites();
-
+  const { createGameStatus } = useWrites();
+  const { zkShuffle } = useZkShuffle();
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
@@ -110,6 +112,15 @@ export default function Home() {
                     }}
                   />
                 )}
+                <Button
+                  onClick={() => {
+                    console.log(shuffleId);
+                    debugger;
+                    zkShuffle.joinGame(shuffleId);
+                  }}
+                >
+                  Join game
+                </Button>
               </dl>
               {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
                   <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">
@@ -128,7 +139,16 @@ export default function Home() {
                 Joiner Address: {joiner ? formatAddress(joiner) : '--'}
               </h2>
               <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5">
-                <StatusItem
+                <Button
+                  onClick={() => {
+                    console.log(shuffleId);
+                    debugger;
+                    zkShuffle.joinGame(shuffleId);
+                  }}
+                >
+                  Join game
+                </Button>
+                {/* <StatusItem
                   label={'Join Status:'}
                   statusLabel={'Joined'}
                   isShowText={joinGameStatus.isSuccess}
@@ -140,7 +160,7 @@ export default function Home() {
                     },
                     children: 'Join game',
                   }}
-                />
+                /> */}
               </dl>
               {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
                   <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">

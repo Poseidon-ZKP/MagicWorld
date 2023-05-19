@@ -1,10 +1,9 @@
-import { ShuffleContext } from './../utils/sdk/context';
 import { useEffect, useState } from 'react';
 import { useContracts } from './useContracts';
 import useEvent from './useEvent';
-import { useNetwork, useSigner } from 'wagmi';
-
+import { useNetwork } from 'wagmi';
 import { config } from '../config';
+import useZkShuffle from './useZkShuffle';
 
 // export interface UseGame {
 //   creator: string;
@@ -18,17 +17,17 @@ export enum IGameStatus {
 }
 
 function useGame(creator: string, joiner: string, address: string) {
-  const { hilo, shuffle } = useContracts();
-  const { data: signer } = useSigner();
-  const { chain } = useNetwork();
+  const { hilo } = useContracts();
 
   const [gameStatus, setGameStatus] = useState<IGameStatus>(
     IGameStatus.WAIT_START
   );
+  const [hiloId, setHiloId] = useState();
+  const [shuffleId, setShuffleId] = useState();
   const createGameListener = useEvent({
     contract: hilo,
     filter: hilo?.filters?.CreateGame(null, null, null),
-    isStop: true,
+    isStop: false,
     addressIndex: 2,
     others: {
       creator: creator,
@@ -37,26 +36,24 @@ function useGame(creator: string, joiner: string, address: string) {
     },
   });
 
-  const curChainConfig = config[chain?.id];
-  const hiloId = createGameListener?.creator?.[0]?.toString();
-  const shuffleId = createGameListener?.creator?.[1]?.toString();
+  // const hiloId = createGameListener?.creator?.[0]?.toString();
+  // const shuffleId = createGameListener?.creator?.[1]?.toString();
+  // console.log('shuffleId', shuffleId);
+
+  useEffect(() => {
+    console.log(window);
+  }, []);
 
   useEffect(() => {
     if (createGameListener?.creator) {
+      const hiloId = createGameListener?.creator?.[0]?.toString();
+      const shuffleId = createGameListener?.creator?.[1]?.toString();
       setGameStatus(IGameStatus.CREATED);
+      setHiloId(hiloId);
+      setShuffleId(shuffleId);
     }
   }, [createGameListener?.creator]);
 
-  useEffect(() => {
-    if (!signer || !shuffle) return;
-    console.log('resource');
-    const shuffleContext = new ShuffleContext(curChainConfig.SHUFFLE, signer);
-    console.log('shuffleContext', shuffleContext);
-    shuffleContext.init();
-    return () => {};
-  }, [signer, shuffle]);
-
-  console.log('hiloId', shuffleId, hiloId);
   return { hiloId, shuffleId, gameStatus, createGameListener };
 }
 

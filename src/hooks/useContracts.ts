@@ -23,6 +23,7 @@ export const useContracts = () => {
 
   return {
     // ...contracts,
+    curChainConfig,
     hilo,
     shuffle,
   };

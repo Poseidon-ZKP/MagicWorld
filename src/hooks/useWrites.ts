@@ -2,13 +2,12 @@ import { useContracts } from './useContracts';
 import useWriteContract from './useWriteContract';
 
 export const useWrites = () => {
-  const { hilo, shuffle } = useContracts();
-  console.log('contracts', hilo);
+  const { hilo } = useContracts();
   const createGameStatus = useWriteContract(hilo?.createGame, {});
-  const joinGameStatus = useWriteContract(shuffle?.joinGame, {});
+  // const joinGameStatus = useWriteContract(shuffle?.joinGame, {});
 
   return {
     createGameStatus,
-    joinGameStatus,
+    // joinGameStatus,
   };
 };
