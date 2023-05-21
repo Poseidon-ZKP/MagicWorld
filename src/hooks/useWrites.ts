@@ -9,6 +9,7 @@ export const useWrites = () => {
   const { zkShuffle } = useZkShuffle();
   const createGameStatus = useWriteContract(hs?.createShuffleForCreator, {});
   const joinGameStatus = useWriteContract(hs?.createShuffleForJoiner, {});
+
   const creatorShuffleJoinStatus = useMutation({
     mutationFn: (shuffleId: number) => {
       return zkShuffle?.joinGame(shuffleId);

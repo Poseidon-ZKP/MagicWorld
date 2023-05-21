@@ -4,7 +4,7 @@ import { ZKShuffle } from '../utils/shuffle/zkShuffle';
 import { dnld_crypto_files } from '../utils/shuffle/utility';
 import { useContracts } from './useContracts';
 import { useSigner } from 'wagmi';
-import { set, get } from 'idb-keyval';
+import { set, get, clear } from 'idb-keyval';
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 
@@ -42,13 +42,19 @@ function useZkShuffle() {
     set('sk', sk);
   };
 
+  // useEffect(() => {
+  //   clear();
+
+  //   return () => {};
+  // }, []);
+
   useEffect(() => {
     const getCacheData = async () => {
       try {
         const data = await getCryptoFilesFromCache();
         let res = null;
         if (!data) {
-          res = await dnld_crypto_files(52);
+          res = await dnld_crypto_files(30);
           if (res) {
             await cacheCryptoFiles(res);
           } else {

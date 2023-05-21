@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useContracts } from './useContracts';
-import useEvent from './useEvent';
+import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useBlockNumber, useNetwork } from 'wagmi';
 import { config } from '../config';
 import useZkShuffle from './useZkShuffle';
@@ -96,9 +96,8 @@ function useGame(creator: string, joiner: string, address: string) {
       setInterval(async () => {
         const startBlock = blockNumber - BLOCK_INTERVAL;
         const res = await zkShuffle.checkTurn(creatorShuffleId, startBlock);
-        console.log('creatorShuffleId', res);
         setCreatorShuffleStatus(res);
-      }, 1000);
+      }, PULL_DATA_TIME);
     }
   }, [creatorShuffleId]);
 
@@ -107,9 +106,8 @@ function useGame(creator: string, joiner: string, address: string) {
       setInterval(async () => {
         const startBlock = blockNumber - BLOCK_INTERVAL;
         const res = await zkShuffle.checkTurn(joinerShuffleId, startBlock);
-        console.log('joinerShuffleId', res);
         setJoinerShuffleStatus(res);
-      }, 1000);
+      }, PULL_DATA_TIME);
     }
   }, [joinerShuffleId]);
 

@@ -37,8 +37,8 @@ export default function Home() {
   const {
     createGameStatus,
     joinGameStatus,
-    creatorShuffleJoinStatus,
-    joinerShuffleJoinStatus,
+    // creatorShuffleJoinStatus,
+    // joinerShuffleJoinStatus,
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
   } = useWrites();
@@ -61,7 +61,10 @@ export default function Home() {
   }
 
   const isCreator = address === creator;
-
+  const userIndex = {
+    creator: isCreator ? 0 : 1,
+    joiner: isCreator ? 1 : 0,
+  };
   // if (!creator || !joiner) {
   //   return (
   //     <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
@@ -112,7 +115,7 @@ export default function Home() {
       </div>
     );
   }
-
+  console.log('zkShuffle', zkShuffle?.smc);
   return (
     <div>
       <div
@@ -160,7 +163,7 @@ export default function Home() {
               isSuccess={createGameStatus.isSuccess}
               isLoading={createGameStatus.isLoading}
               onClick={() => {
-                createGameStatus.run();
+                createGameStatus.run(zkShuffle.pk[0], zkShuffle.pk[1]);
               }}
             >
               Create
@@ -173,7 +176,7 @@ export default function Home() {
               isSuccess={joinGameStatus.isSuccess}
               isLoading={joinGameStatus.isLoading}
               onClick={() => {
-                joinGameStatus.run(hsId);
+                joinGameStatus.run(hsId, zkShuffle.pk[0], zkShuffle.pk[1]);
               }}
             >
               Join
@@ -182,20 +185,35 @@ export default function Home() {
 
           {gameStatus === IGameStatus.JOINED && (
             <Button
-              isError={creatorShuffleJoinStatus.isError}
-              isSuccess={creatorShuffleJoinStatus.isSuccess}
-              isLoading={creatorShuffleJoinStatus.isLoading}
+              isError={creatorShuffleShuffleStatus.isError}
+              isSuccess={creatorShuffleShuffleStatus.isSuccess}
+              isLoading={creatorShuffleShuffleStatus.isLoading}
               onClick={() => {
                 // zkShuffle?.joinGame(creatorShuffleId);
                 debugger;
-                creatorShuffleJoinStatus.mutateAsync(creatorShuffleId);
+                creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
               }}
             >
-              Creator shuffle join
+              Creator shuffle shuffle
             </Button>
           )}
 
-          {gameStatus === IGameStatus.CREATOR_SHUFFLE_JOINED && (
+          <Button
+            isError={creatorShuffleShuffleStatus.isError}
+            isSuccess={creatorShuffleShuffleStatus.isSuccess}
+            isLoading={creatorShuffleShuffleStatus.isLoading}
+            onClick={async () => {
+              const res = await zkShuffle.generate_shuffle_proof('5');
+              console.log('res', res);
+              // zkShuffle?.joinGame(creatorShuffleId);
+              // debugger;
+              // creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
+            }}
+          >
+            test
+          </Button>
+
+          {/* {gameStatus === IGameStatus.CREATOR_SHUFFLE_JOINED && (
             <Button
               isError={joinerShuffleJoinStatus.isError}
               isSuccess={joinerShuffleJoinStatus.isSuccess}
@@ -235,7 +253,7 @@ export default function Home() {
             >
               Joiner shuffle shuffle
             </Button>
-          )}
+          )} */}
 
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
         </div>

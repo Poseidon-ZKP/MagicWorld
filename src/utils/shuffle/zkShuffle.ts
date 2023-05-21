@@ -1,26 +1,31 @@
-import { shuffleEncryptV2Plaintext } from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/plaintext";
+import { shuffleEncryptV2Plaintext } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/plaintext';
 import {
   dealCompressedCard,
   dealUncompressedCard,
+  FullProof,
   generateDecryptProof,
-  generateShuffleEncryptV2Proof,
   packToSolidityProof,
   SolidityProof,
-} from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof";
+} from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
+// import snarkjs from 'snarkjs';
+
+const snarkjs = require('snarkjs');
+
 import {
   initDeck,
   ecX2Delta,
-  prepareShuffleDeck,
+  // prepareShuffleDeck,
   sampleFieldElements,
   samplePermutation,
   prepareDecryptData,
-} from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/utilities";
+  // recoverDeck,
+} from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/utilities';
 
-import { Contract, ethers, Signer } from "ethers";
-import shuffleManagerJson from "./ABI/ShuffleManager.json";
+import { Contract, ethers, Signer } from 'ethers';
+import shuffleManagerJson from './ABI/ShuffleManager.json';
 
-const buildBabyjub = require("circomlibjs").buildBabyjub;
-const Scalar = require("ffjavascript").Scalar;
+const buildBabyjub = require('circomlibjs').buildBabyjub;
+const Scalar = require('ffjavascript').Scalar;
 
 export type BabyJub = any;
 export type EC = any;
@@ -44,6 +49,87 @@ export enum GameTurn {
   Open, // Open Card
   Complete, // Game End
   Error, // Game Error
+}
+
+export function recoverDeck(
+  babyjub: BabyJub,
+  X0: bigint[],
+  X1: bigint[]
+): { Delta0: bigint[]; Delta1: bigint[] } {
+  let Delta0: bigint[] = [];
+  let Delta1: bigint[] = [];
+
+  for (let i = 0; i < X0.length; i++) {
+    Delta0.push(ecX2Delta(babyjub, X0[i]));
+    Delta1.push(ecX2Delta(babyjub, X1[i]));
+  }
+
+  return { Delta0: Delta0, Delta1: Delta1 };
+}
+
+// Prepares deck queried from contract to the deck for generating ZK proof.
+export function prepareShuffleDeck(
+  babyjub: BabyJub,
+  deck: Deck,
+  numCards: number
+): { X0: bigint[]; X1: bigint[]; Selector: bigint[]; Delta: bigint[][] } {
+  let deckX0: bigint[] = [];
+  let deckX1: bigint[] = [];
+  for (let i = 0; i < numCards; i++) {
+    deckX0.push(deck.X0[i].toBigInt());
+  }
+  for (let i = 0; i < numCards; i++) {
+    deckX1.push(deck.X1[i].toBigInt());
+  }
+  let deckDelta = recoverDeck(babyjub, deckX0, deckX1);
+  return {
+    X0: deckX0,
+    X1: deckX1,
+    Selector: [
+      deck.selector0._data.toBigInt(),
+      deck.selector1._data.toBigInt(),
+    ],
+    Delta: [deckDelta.Delta0, deckDelta.Delta1],
+  };
+}
+
+export async function generateShuffleEncryptV2Proof(
+  pk: bigint[],
+  A: bigint[],
+  R: bigint[],
+  UX0: bigint[],
+  UX1: bigint[],
+  UDelta0: bigint[],
+  UDelta1: bigint[],
+  s_u: bigint[],
+  VX0: bigint[],
+  VX1: bigint[],
+  VDelta0: bigint[],
+  VDelta1: bigint[],
+  s_v: bigint[],
+  wasmFile: string,
+  zkeyFile: string
+): Promise<FullProof> {
+  debugger;
+  return <FullProof>await snarkjs.groth16.fullProve(
+    {
+      pk: pk,
+      A: A,
+      R: R,
+      UX0: UX0,
+      UX1: UX1,
+      UDelta0: UDelta0,
+      UDelta1: UDelta1,
+      VX0: VX0,
+      VX1: VX1,
+      VDelta0: VDelta0,
+      VDelta1: VDelta1,
+      s_u: s_u,
+      s_v: s_v,
+    },
+    wasmFile,
+    zkeyFile
+  );
 }
 
 interface IZKShuffle {
@@ -90,10 +176,10 @@ export class ZKShuffle implements IZKShuffle {
     shuffleManagerContract: string,
     owner: Signer,
     seed: bigint,
-    decrypt_wasm: string = "",
-    decrypt_zkey: string = "",
-    encrypt_wasm: string = "",
-    encrypt_zkey: string = ""
+    decrypt_wasm: string = '',
+    decrypt_zkey: string = '',
+    encrypt_wasm: string = '',
+    encrypt_zkey: string = ''
   ): Promise<ZKShuffle> => {
     const ctx = new ZKShuffle(shuffleManagerContract, owner);
     await ctx.init(
@@ -120,7 +206,7 @@ export class ZKShuffle implements IZKShuffle {
 
     this.babyjub = await buildBabyjub();
     if (seed >= this.babyjub.p) {
-      throw new Error("Seed is too large");
+      throw new Error('Seed is too large');
     }
     this.sk = seed;
     const keys = this.babyjub.mulPointEscalar(this.babyjub.Base8, this.sk);
@@ -187,7 +273,7 @@ export class ZKShuffle implements IZKShuffle {
         case BaseState.GameError:
           return GameTurn.Error;
         default:
-          console.log("err state ", e.args.state);
+          console.log('err state ', e.args.state);
           break;
       }
     }
@@ -202,7 +288,7 @@ export class ZKShuffle implements IZKShuffle {
     const key = await this.smc.queryAggregatedPk(gameId);
     const aggrPK = [key[0].toBigInt(), key[1].toBigInt()];
     const aggrPKEC = [this.babyjub.F.e(aggrPK[0]), this.babyjub.F.e(aggrPK[1])];
-
+    debugger;
     let deck = await this.smc.queryDeck(gameId);
     let preprocessedDeck = prepareShuffleDeck(this.babyjub, deck, numCards);
     let A = samplePermutation(Number(numCards));
@@ -267,11 +353,11 @@ export class ZKShuffle implements IZKShuffle {
     const start = Date.now();
     await this._shuffle(gameId);
     console.log(
-      "Player ",
+      'Player ',
       await this.getPlayerId(gameId),
-      " Shuffled in ",
+      ' Shuffled in ',
       Date.now() - start,
-      "ms"
+      'ms'
     );
     return true;
   }
@@ -316,11 +402,11 @@ export class ZKShuffle implements IZKShuffle {
     ).cardsToDeal._data.toNumber();
     await this.decrypt(gameId, Math.log2(cardsToDeal)); // TODO : multi card compatible
     console.log(
-      "Player ",
+      'Player ',
       await this.getPlayerId(gameId),
-      " Drawed in ",
+      ' Drawed in ',
       Date.now() - start,
-      "ms"
+      'ms'
     );
     return true;
   }
@@ -415,7 +501,7 @@ export class ZKShuffle implements IZKShuffle {
     const setBitsPositions: number[] = [];
 
     for (let i = binaryString.length - 1; i >= 0; i--) {
-      if (binaryString[i] === "1") {
+      if (binaryString[i] === '1') {
         setBitsPositions.push(binaryString.length - 1 - i);
       }
     }
@@ -430,7 +516,7 @@ export class ZKShuffle implements IZKShuffle {
     ).cardsToDeal._data.toNumber();
 
     await this.batchDecrypt(gameId, this.getSetBitsPositions(cardsToDeal));
-    console.log("Batch Drawed in ", Date.now() - start, "ms");
+    console.log('Batch Drawed in ', Date.now() - start, 'ms');
     return true;
   }
 
@@ -470,7 +556,7 @@ export class ZKShuffle implements IZKShuffle {
 
       proofs.push(packToSolidityProof(decryptProof.proof));
     }
-    console.log("generate open card proof in ", Date.now() - start, "ms");
+    console.log('generate open card proof in ', Date.now() - start, 'ms');
     return {
       cardMap: cardMap,
       decryptedCards: decryptedCards,

@@ -3,8 +3,8 @@ import { arbitrumGoerli } from 'wagmi/chains';
 
 export const config = {
   [arbitrumGoerli.id]: {
-    SHUFFLE: '0x827876B1b9EF0f69C5560377919208086998c0dF',
+    SHUFFLE: '0xb6C592627F6fe0332908363D2d0d5062E20f3295',
     HILO: '0xbF97898A0e5d41B7cd8DA85769997D76a31f6964',
-    KS: '0xe4FcB670a6aDBEdC3C6dDe759C01b1f46dD01332',
+    KS: '0xC8CA6F502a9F8C611691B3ce343Ca575c3E34282',
   },
 };

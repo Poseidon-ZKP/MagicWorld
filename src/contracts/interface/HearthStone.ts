@@ -33,6 +33,8 @@ export type GameStruct = {
   shield: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
   shuffleIds: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>];
   curPlayerIndex: PromiseOrValue<BigNumberish>;
+  pkX: PromiseOrValue<BigNumberish>;
+  pkY: PromiseOrValue<BigNumberish>;
 };
 
 export type GameStructOutput = [
@@ -40,6 +42,8 @@ export type GameStructOutput = [
   [BigNumber, BigNumber],
   [BigNumber, BigNumber],
   [BigNumber, BigNumber],
+  BigNumber,
+  BigNumber,
   BigNumber
 ] & {
   players: [string, string];
@@ -47,6 +51,8 @@ export type GameStructOutput = [
   shield: [BigNumber, BigNumber];
   shuffleIds: [BigNumber, BigNumber];
   curPlayerIndex: BigNumber;
+  pkX: BigNumber;
+  pkY: BigNumber;
 };
 
 export interface HearthStoneInterface extends utils.Interface {
@@ -54,11 +60,11 @@ export interface HearthStoneInterface extends utils.Interface {
     "INVALID_INDEX()": FunctionFragment;
     "cardConfig()": FunctionFragment;
     "chooseCard(uint256,uint256,uint256)": FunctionFragment;
-    "createShuffleForCreator()": FunctionFragment;
-    "createShuffleForJoiner(uint256)": FunctionFragment;
+    "createShuffleForCreator(uint256,uint256)": FunctionFragment;
+    "createShuffleForJoiner(uint256,uint256,uint256)": FunctionFragment;
     "dealCardsToPlayer(uint256)": FunctionFragment;
     "getGameInfo(uint256)": FunctionFragment;
-    "largestKSId()": FunctionFragment;
+    "largestHSId()": FunctionFragment;
     "moveToShuffleStage(uint256)": FunctionFragment;
     "settle(uint256,uint256,uint256)": FunctionFragment;
     "shuffle()": FunctionFragment;
@@ -73,7 +79,7 @@ export interface HearthStoneInterface extends utils.Interface {
       | "createShuffleForJoiner"
       | "dealCardsToPlayer"
       | "getGameInfo"
-      | "largestKSId"
+      | "largestHSId"
       | "moveToShuffleStage"
       | "settle"
       | "shuffle"
@@ -97,11 +103,15 @@ export interface HearthStoneInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createShuffleForCreator",
-    values?: undefined
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "createShuffleForJoiner",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "dealCardsToPlayer",
@@ -112,7 +122,7 @@ export interface HearthStoneInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "largestKSId",
+    functionFragment: "largestHSId",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -152,7 +162,7 @@ export interface HearthStoneInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "largestKSId",
+    functionFragment: "largestHSId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -275,11 +285,15 @@ export interface HearthStone extends BaseContract {
     ): Promise<ContractTransaction>;
 
     createShuffleForCreator(
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     createShuffleForJoiner(
       hsId: PromiseOrValue<BigNumberish>,
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -293,7 +307,7 @@ export interface HearthStone extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[GameStructOutput]>;
 
-    largestKSId(overrides?: CallOverrides): Promise<[BigNumber]>;
+    largestHSId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     moveToShuffleStage(
       shuffleId: PromiseOrValue<BigNumberish>,
@@ -322,11 +336,15 @@ export interface HearthStone extends BaseContract {
   ): Promise<ContractTransaction>;
 
   createShuffleForCreator(
+    pkX: PromiseOrValue<BigNumberish>,
+    pkY: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   createShuffleForJoiner(
     hsId: PromiseOrValue<BigNumberish>,
+    pkX: PromiseOrValue<BigNumberish>,
+    pkY: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -340,7 +358,7 @@ export interface HearthStone extends BaseContract {
     overrides?: CallOverrides
   ): Promise<GameStructOutput>;
 
-  largestKSId(overrides?: CallOverrides): Promise<BigNumber>;
+  largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
   moveToShuffleStage(
     shuffleId: PromiseOrValue<BigNumberish>,
@@ -368,10 +386,16 @@ export interface HearthStone extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    createShuffleForCreator(overrides?: CallOverrides): Promise<void>;
+    createShuffleForCreator(
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     createShuffleForJoiner(
       hsId: PromiseOrValue<BigNumberish>,
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -385,7 +409,7 @@ export interface HearthStone extends BaseContract {
       overrides?: CallOverrides
     ): Promise<GameStructOutput>;
 
-    largestKSId(overrides?: CallOverrides): Promise<BigNumber>;
+    largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
     moveToShuffleStage(
       shuffleId: PromiseOrValue<BigNumberish>,
@@ -470,11 +494,15 @@ export interface HearthStone extends BaseContract {
     ): Promise<BigNumber>;
 
     createShuffleForCreator(
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     createShuffleForJoiner(
       hsId: PromiseOrValue<BigNumberish>,
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -488,7 +516,7 @@ export interface HearthStone extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    largestKSId(overrides?: CallOverrides): Promise<BigNumber>;
+    largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
     moveToShuffleStage(
       shuffleId: PromiseOrValue<BigNumberish>,
@@ -518,11 +546,15 @@ export interface HearthStone extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     createShuffleForCreator(
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     createShuffleForJoiner(
       hsId: PromiseOrValue<BigNumberish>,
+      pkX: PromiseOrValue<BigNumberish>,
+      pkY: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -536,7 +568,7 @@ export interface HearthStone extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    largestKSId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    largestHSId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     moveToShuffleStage(
       shuffleId: PromiseOrValue<BigNumberish>,
