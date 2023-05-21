@@ -51,6 +51,7 @@ interface IZKShuffle {
   checkTurn: (gameId: number, startBlock: number) => Promise<GameTurn>;
   shuffle: (gameId: number) => Promise<boolean>;
   draw: (gameId: number) => Promise<boolean>;
+  batchDraw: (gameId: number) => Promise<boolean>;
   open: (gameId: number, cardIds: number[]) => Promise<number[]>;
   openOffchain: (gameId: number, cardIds: number[]) => Promise<number[]>;
 
@@ -422,18 +423,15 @@ export class ZKShuffle implements IZKShuffle {
     return setBitsPositions;
   }
 
-  async batchDraw(gameId: number): Promise<bigint[]> {
+  async batchDraw(gameId: number): Promise<boolean> {
     const start = Date.now();
     let cardsToDeal = (
       await this.smc.queryDeck(gameId)
     ).cardsToDeal._data.toNumber();
 
-    const res = await this.batchDecrypt(
-      gameId,
-      this.getSetBitsPositions(cardsToDeal)
-    );
+    await this.batchDecrypt(gameId, this.getSetBitsPositions(cardsToDeal));
     console.log("Batch Drawed in ", Date.now() - start, "ms");
-    return res;
+    return true;
   }
 
   async getOpenProof(gameId: number, cardIds: number[]) {
