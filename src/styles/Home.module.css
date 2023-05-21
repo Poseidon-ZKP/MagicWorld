@@ -108,6 +108,19 @@
   margin-left: 0.5rem;
 }
 
+.half-circle-border {
+  width: 200px;
+  height: 100px;
+  border: 2px solid black;
+  border-radius: 100px 100px 0 0; /* 设置半弧效果 */
+}
+
+.bg {
+  background-image: url('../assets/images/bg.jpg');
+  background-repeat: repeat;
+  /* background-color: #25304d; */
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

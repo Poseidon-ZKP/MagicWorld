@@ -29,7 +29,7 @@ function useWriteContract<Params = any, Response = any>(
 
     try {
       let res: any = await method(...[...args, ...fnArgs]);
-      wait && (res = await res.wait());
+      wait && res?.wait && (res = await res?.wait());
       setResult(res);
       setIsSuccess(true);
     } catch (e) {

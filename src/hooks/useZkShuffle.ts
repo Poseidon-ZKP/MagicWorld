@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 // import useSigner from '../hooks/useSigner';
-import { ZKShuffle } from '../utils/shuffle/zkshuffle';
+import { ZKShuffle } from '../utils/shuffle/zkShuffle';
 import { dnld_crypto_files } from '../utils/shuffle/utility';
 import { useContracts } from './useContracts';
-import { useAccount, useSigner } from 'wagmi';
+import { useSigner } from 'wagmi';
 import { set, get } from 'idb-keyval';
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
@@ -11,9 +11,7 @@ type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 function useZkShuffle() {
   const { curChainConfig } = useContracts();
   const { data: signer } = useSigner();
-  const { address } = useAccount();
-  //   console.log('provider', provider);
-  console.log('signer', signer);
+
   const [zkShuffle, setZkShuffle] = useState<ZKShuffle>();
   const cacheCryptoFiles = async (
     files: UnwrapPromise<ReturnType<typeof dnld_crypto_files>>
@@ -39,32 +37,42 @@ function useZkShuffle() {
       ? { encrypt_wasm, encrypt_zkey, decrypt_wasm, decrypt_zkey }
       : null;
   };
-  //   console.log('signer', signer, { ...signer });
+
+  const cacheSk = (sk: string) => {
+    set('sk', sk);
+  };
+
   useEffect(() => {
     const getCacheData = async () => {
-      const data = await getCryptoFilesFromCache();
-      let res = null;
-      if (!data) {
-        res = await dnld_crypto_files(52);
-        if (res) {
-          await cacheCryptoFiles(res);
-        } else {
-          console.log('get crypto files error');
-          return;
+      try {
+        const data = await getCryptoFilesFromCache();
+        let res = null;
+        if (!data) {
+          res = await dnld_crypto_files(52);
+          if (res) {
+            await cacheCryptoFiles(res);
+          } else {
+            console.log('get crypto files error');
+            return;
+          }
         }
+        const shuffleParams = data || res;
+        let seed = await get('sk');
+        seed = seed || (await ZKShuffle.generateShuffleSecret());
+
+        const zkShuffle = await ZKShuffle.create(
+          curChainConfig.SHUFFLE,
+          signer,
+          seed,
+          shuffleParams.decrypt_wasm,
+          shuffleParams.decrypt_zkey,
+          shuffleParams.encrypt_wasm,
+          shuffleParams.encrypt_zkey
+        );
+        setZkShuffle(zkShuffle);
+      } catch (error) {
+        console.log('error', error);
       }
-      const shuffleParams = data || res;
-      const seed = await ZKShuffle.generateShuffleSecret();
-      const zkShuffle = await ZKShuffle.create(
-        curChainConfig.SHUFFLE,
-        signer,
-        seed,
-        shuffleParams.decrypt_wasm,
-        shuffleParams.decrypt_zkey,
-        shuffleParams.encrypt_wasm,
-        shuffleParams.encrypt_zkey
-      );
-      setZkShuffle(zkShuffle);
     };
     if (!signer) return;
     getCacheData();

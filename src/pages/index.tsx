@@ -1,5 +1,7 @@
 import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
+
 import React from 'react';
+import Image from 'next/image';
 import { formatAddress } from '../utils/common';
 
 import { useRouter } from 'next/router';
@@ -11,6 +13,17 @@ import useGame, { IGameStatus } from '../hooks/useGame';
 import useZkShuffle from '../hooks/useZkShuffle';
 import Button from '../components/Button';
 
+import noAvatar from '../assets/images/noAvatar.png';
+import mockUser1 from '../assets/images/mockUser1.jpg';
+import mockUser2 from '../assets/images/mockUser2.jpg';
+import tank from '../assets/images/tank.jpeg';
+import warrior from '../assets/images/warrior.jpeg';
+import wizard from '../assets/images/wizard.jpeg';
+
+import Card from '../components/Card';
+
+import styles from '../styles/Home.module.css';
+
 export default function Home() {
   const { connect, connectors } = useConnect();
 
@@ -21,12 +34,23 @@ export default function Home() {
 
   const { chain } = useNetwork();
   const { address } = useAccount();
-  const { createGameStatus } = useWrites();
+  const {
+    createGameStatus,
+    joinGameStatus,
+    creatorShuffleJoinStatus,
+    joinerShuffleJoinStatus,
+    creatorShuffleShuffleStatus,
+    joinerShuffleShuffleStatus,
+  } = useWrites();
   const { zkShuffle } = useZkShuffle();
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
-  const { shuffleId, hiloId, gameStatus } = useGame(creator, joiner, address);
+  const { hsId, creatorShuffleId, joinerShuffleId, gameStatus } = useGame(
+    creator,
+    joiner,
+    address
+  );
 
   if (!router.isReady) {
     return (
@@ -35,6 +59,8 @@ export default function Home() {
       </div>
     );
   }
+
+  const isCreator = address === creator;
 
   // if (!creator || !joiner) {
   //   return (
@@ -89,88 +115,161 @@ export default function Home() {
 
   return (
     <div>
-      <div className="relative flex flex-col h-screen bg-slate-900">
-        <div className="flex flex-row gap-20">
-          <div className="relative z-10 bg-white rounded-xl shadow-xl  bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 dark:highlight-white/10">
-            <article>
-              <h2 className="text-lg font-semibold text-slate-900 pt-4 pb-2 px-4 sm:px-6 lg:px-4 xl:px-6 dark:text-slate-100 transition-opacity duration-[1.5s] delay-500 ">
-                Creator Address:{creator ? formatAddress(creator) : '--'}
-              </h2>
-              <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5">
-                {gameStatus == IGameStatus.WAIT_START && (
-                  <StatusItem
-                    label={'Create Status:'}
-                    statusLabel={'Created'}
-                    isShowText={createGameStatus.isSuccess}
-                    uiStatus={!createGameStatus.isSuccess}
-                    buttonStatus={createGameStatus}
-                    buttonProps={{
-                      onClick: async () => {
-                        await createGameStatus?.run();
-                      },
-                      children: 'Start game',
-                    }}
-                  />
-                )}
-                <Button
-                  onClick={() => {
-                    console.log(shuffleId);
-                    debugger;
-                    zkShuffle.joinGame(shuffleId);
-                  }}
-                >
-                  Join game
-                </Button>
-              </dl>
-              {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
-                  <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">
-                    Decline
-                  </div>
-                  <div className="text-base font-medium rounded-lg bg-sky-500 text-white py-3 text-center cursor-pointer dark:highlight-white/20">
-                    Accept
-                  </div>
-                </div> */}
-            </article>
+      <div
+        className={`relative flex flex-col h-screen  p-4 justify-between ${styles.bg}`}
+      >
+        <div
+          className={`flex w-full flex-col items-center justify-center gap-5 `}
+        >
+          {/* <Image src={noAvatar.src} width={120} height={120} alt="" /> */}
+          <div className="flex flex-row gap-5 items-center">
+            <Image
+              src={mockUser1.src}
+              width={120}
+              height={120}
+              alt=""
+              className="rounded-full"
+            />
+            <div>
+              <div className="text-gray-400 text-2xl font-mono font-bold">
+                HP:100
+              </div>
+              <div className="text-gray-400 text-2xl font-mono font-bold">
+                address:{formatAddress(joiner)}
+              </div>
+            </div>
+          </div>
+          <div className="w-[96rem]  flex flex-1  flex-row gap-2 overflow-x-auto ">
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={warrior.src} isFlipped />
+            <Card cardValue={warrior.src} isFlipped />
+          </div>
+        </div>
+        <div className="m-1 flex flex-row w-full gap-4 items-center">
+          <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
+          {isCreator && gameStatus === IGameStatus.WAIT_START && (
+            <Button
+              isError={createGameStatus.isError}
+              isSuccess={createGameStatus.isSuccess}
+              isLoading={createGameStatus.isLoading}
+              onClick={() => {
+                createGameStatus.run();
+              }}
+            >
+              Create
+            </Button>
+          )}
+
+          {!isCreator && gameStatus === IGameStatus.CREATED && (
+            <Button
+              isError={joinGameStatus.isError}
+              isSuccess={joinGameStatus.isSuccess}
+              isLoading={joinGameStatus.isLoading}
+              onClick={() => {
+                joinGameStatus.run(hsId);
+              }}
+            >
+              Join
+            </Button>
+          )}
+
+          {gameStatus === IGameStatus.JOINED && (
+            <Button
+              isError={creatorShuffleJoinStatus.isError}
+              isSuccess={creatorShuffleJoinStatus.isSuccess}
+              isLoading={creatorShuffleJoinStatus.isLoading}
+              onClick={() => {
+                // zkShuffle?.joinGame(creatorShuffleId);
+                debugger;
+                creatorShuffleJoinStatus.mutateAsync(creatorShuffleId);
+              }}
+            >
+              Creator shuffle join
+            </Button>
+          )}
+
+          {gameStatus === IGameStatus.CREATOR_SHUFFLE_JOINED && (
+            <Button
+              isError={joinerShuffleJoinStatus.isError}
+              isSuccess={joinerShuffleJoinStatus.isSuccess}
+              isLoading={joinerShuffleJoinStatus.isLoading}
+              onClick={() => {
+                // zkShuffle?.joinGame(creatorShuffleId);
+                joinerShuffleJoinStatus.mutateAsync(joinerShuffleId);
+              }}
+            >
+              Joiner shuffle join
+            </Button>
+          )}
+
+          {gameStatus === IGameStatus.JOINER_SHUFFLE_JOINED && (
+            <Button
+              isError={creatorShuffleShuffleStatus.isError}
+              isSuccess={creatorShuffleShuffleStatus.isSuccess}
+              isLoading={creatorShuffleShuffleStatus.isLoading}
+              onClick={() => {
+                // zkShuffle?.joinGame(creatorShuffleId);
+                creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
+              }}
+            >
+              Creator shuffle shuffle
+            </Button>
+          )}
+
+          {gameStatus === IGameStatus.CREATOR_SHUFFLE_SHUFFLED && (
+            <Button
+              isError={joinerShuffleShuffleStatus.isError}
+              isSuccess={joinerShuffleShuffleStatus.isSuccess}
+              isLoading={joinerShuffleShuffleStatus.isLoading}
+              onClick={() => {
+                // zkShuffle?.joinGame(creatorShuffleId);
+                joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+              }}
+            >
+              Joiner shuffle shuffle
+            </Button>
+          )}
+
+          <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
+        </div>
+        <div className="flex w-full flex-col items-center justify-center gap-5">
+          <div className="w-[96rem] flex flex-1  flex-row gap-2 overflow-x-auto ">
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={wizard.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={tank.src} isFlipped />
+            <Card cardValue={warrior.src} isFlipped />
+            <Card cardValue={warrior.src} isFlipped />
           </div>
 
-          <div className="relative z-10 bg-white rounded-xl shadow-xl ring-1 ring-slate-900/5 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 dark:highlight-white/10">
-            <article>
-              <h2 className="text-lg font-semibold text-slate-900 pt-4 pb-2 px-4 sm:px-6 lg:px-4 xl:px-6 dark:text-slate-100 transition-opacity duration-[1.5s] delay-500 ">
-                Joiner Address: {joiner ? formatAddress(joiner) : '--'}
-              </h2>
-              <dl className="w-96 flex flex-col flex-wrap divide-y divide-slate-200 border-b border-slate-200 text-sm sm:text-base lg:text-sm xl:text-base dark:divide-slate-200/5 dark:border-slate-200/5">
-                <Button
-                  onClick={() => {
-                    console.log(shuffleId);
-                    debugger;
-                    zkShuffle.joinGame(shuffleId);
-                  }}
-                >
-                  Join game
-                </Button>
-                {/* <StatusItem
-                  label={'Join Status:'}
-                  statusLabel={'Joined'}
-                  isShowText={joinGameStatus.isSuccess}
-                  uiStatus={!joinGameStatus.isSuccess}
-                  buttonStatus={joinGameStatus}
-                  buttonProps={{
-                    onClick: async () => {
-                      await joinGameStatus?.run(shuffleId);
-                    },
-                    children: 'Join game',
-                  }}
-                /> */}
-              </dl>
-              {/* <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:gap-x-4 xl:gap-x-6 p-4 sm:px-6 sm:py-5 lg:p-4 xl:px-6 xl:py-5">
-                  <div className="text-base font-medium rounded-lg bg-slate-100 text-slate-900 py-3 text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10">
-                    Decline
-                  </div>
-                  <div className="text-base font-medium rounded-lg bg-sky-500 text-white py-3 text-center cursor-pointer dark:highlight-white/20">
-                    Accept
-                  </div>
-                </div> */}
-            </article>
+          {/* <Image src={noAvatar.src} width={120} height={120} alt="" /> */}
+          <div className="flex flex-row gap-5 items-center">
+            <Image
+              src={mockUser2.src}
+              width={120}
+              height={120}
+              alt=""
+              className="rounded-full"
+            />
+            <div>
+              <div className="text-gray-400 text-2xl font-mono font-bold">
+                HP:100
+              </div>
+              <div className="text-gray-400 text-2xl font-mono font-bold">
+                address:{formatAddress(joiner)}
+              </div>
+            </div>
           </div>
         </div>
       </div>

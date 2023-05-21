@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useContract, useNetwork, useProvider, useSigner } from 'wagmi';
 import { config } from '../config';
 import {
+  HearthStone__factory,
   HiloGame__factory,
   ShuffleManager__factory,
 } from '../contracts/interface';
@@ -21,10 +22,17 @@ export const useContracts = () => {
     signerOrProvider: signer,
   });
 
+  const hs = useContract({
+    address: curChainConfig?.KS,
+    abi: HearthStone__factory.abi,
+    signerOrProvider: signer,
+  });
+
   return {
     // ...contracts,
     curChainConfig,
     hilo,
     shuffle,
+    hs,
   };
 };

@@ -56,7 +56,6 @@ function useEvent({
     if (!contract) return;
     if (!isStop) {
       interval = setInterval(async () => {
-        console.log('111111');
         const logs = await provider.getLogs(
           getLogParams({
             filter: filter as EventFilter,
