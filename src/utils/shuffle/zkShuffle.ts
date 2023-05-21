@@ -1,4 +1,4 @@
-import { shuffleEncryptV2Plaintext } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/plaintext';
+import { shuffleEncryptV2Plaintext } from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/plaintext";
 import {
   dealCompressedCard,
   dealUncompressedCard,
@@ -6,19 +6,21 @@ import {
   generateShuffleEncryptV2Proof,
   packToSolidityProof,
   SolidityProof,
-} from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
+} from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof";
 import {
   initDeck,
+  ecX2Delta,
   prepareShuffleDeck,
   sampleFieldElements,
   samplePermutation,
-} from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/utilities';
+  prepareDecryptData,
+} from "@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/utilities";
 
-import { Contract, ethers, Signer } from 'ethers';
-import shuffleManagerJson from './ABI/ShuffleManager.json';
+import { Contract, ethers, Signer } from "ethers";
+import shuffleManagerJson from "./ABI/ShuffleManager.json";
 
-const buildBabyjub = require('circomlibjs').buildBabyjub;
-const Scalar = require('ffjavascript').Scalar;
+const buildBabyjub = require("circomlibjs").buildBabyjub;
+const Scalar = require("ffjavascript").Scalar;
 
 export type BabyJub = any;
 export type EC = any;
@@ -87,10 +89,10 @@ export class ZKShuffle implements IZKShuffle {
     shuffleManagerContract: string,
     owner: Signer,
     seed: bigint,
-    decrypt_wasm: string = '',
-    decrypt_zkey: string = '',
-    encrypt_wasm: string = '',
-    encrypt_zkey: string = ''
+    decrypt_wasm: string = "",
+    decrypt_zkey: string = "",
+    encrypt_wasm: string = "",
+    encrypt_zkey: string = ""
   ): Promise<ZKShuffle> => {
     const ctx = new ZKShuffle(shuffleManagerContract, owner);
     await ctx.init(
@@ -117,7 +119,7 @@ export class ZKShuffle implements IZKShuffle {
 
     this.babyjub = await buildBabyjub();
     if (seed >= this.babyjub.p) {
-      throw new Error('Seed is too large');
+      throw new Error("Seed is too large");
     }
     this.sk = seed;
     const keys = this.babyjub.mulPointEscalar(this.babyjub.Base8, this.sk);
@@ -184,7 +186,7 @@ export class ZKShuffle implements IZKShuffle {
         case BaseState.GameError:
           return GameTurn.Error;
         default:
-          console.log('err state ', e.args.state);
+          console.log("err state ", e.args.state);
           break;
       }
     }
@@ -264,11 +266,11 @@ export class ZKShuffle implements IZKShuffle {
     const start = Date.now();
     await this._shuffle(gameId);
     console.log(
-      'Player ',
+      "Player ",
       await this.getPlayerId(gameId),
-      ' Shuffled in ',
+      " Shuffled in ",
       Date.now() - start,
-      'ms'
+      "ms"
     );
     return true;
   }
@@ -313,13 +315,125 @@ export class ZKShuffle implements IZKShuffle {
     ).cardsToDeal._data.toNumber();
     await this.decrypt(gameId, Math.log2(cardsToDeal)); // TODO : multi card compatible
     console.log(
-      'Player ',
+      "Player ",
       await this.getPlayerId(gameId),
-      ' Drawed in ',
+      " Drawed in ",
       Date.now() - start,
-      'ms'
+      "ms"
     );
     return true;
+  }
+
+  async dealMultiCompressedCard(
+    babyjub: BabyJub,
+    numCards: number,
+    gameId: number,
+    cards: number[],
+    sk: bigint,
+    pk: bigint[],
+    stateMachineContract: Contract,
+    decryptWasmFile: string,
+    decryptZkeyFile: string
+  ) {
+    let proofs = [];
+    let decryptedDatas = [];
+    let initDeltas = [];
+    for (let i = 0; i < cards.length; i++) {
+      let deck = await stateMachineContract.queryDeck(gameId);
+      let Y = prepareDecryptData(
+        babyjub,
+        deck.X0[cards[i]],
+        deck.X1[cards[i]],
+        deck.selector0._data,
+        deck.selector1._data,
+        Number(numCards),
+        cards[i]
+      );
+      let decryptProof = await generateDecryptProof(
+        Y,
+        sk,
+        pk,
+        decryptWasmFile,
+        decryptZkeyFile
+      );
+      let solidityProof: SolidityProof = packToSolidityProof(
+        decryptProof.proof
+      );
+
+      proofs[i] = solidityProof;
+      decryptedDatas[i] = {
+        X: decryptProof.publicSignals[0],
+        Y: decryptProof.publicSignals[1],
+      };
+      initDeltas[i] = [ecX2Delta(babyjub, Y[0]), ecX2Delta(babyjub, Y[2])];
+    }
+    await (
+      await stateMachineContract.playerDealCards(
+        gameId,
+        proofs,
+        decryptedDatas,
+        initDeltas
+      )
+    ).wait();
+  }
+
+  async batchDecrypt(gameId: number, cards: number[]): Promise<bigint[]> {
+    const numCards = (await this.smc.getNumCards(gameId)).toNumber();
+    const isFirstDecryption =
+      (await this.smc.getDecryptRecord(gameId, cards[0]))._data.toNumber() == 0;
+    let res: bigint[] = [];
+    if (isFirstDecryption) {
+      await this.dealMultiCompressedCard(
+        this.babyjub,
+        numCards,
+        gameId,
+        cards,
+        this.sk,
+        this.pk,
+        this.smc,
+        this.decrypt_wasm,
+        this.decrypt_zkey
+      );
+    } else {
+      res = await dealUncompressedCard(
+        gameId,
+        cards[0],
+        this.sk,
+        this.pk,
+        this.smc,
+        this.decrypt_wasm,
+        this.decrypt_zkey
+      );
+    }
+    //console.log("decrypting card", cardIdx, " DONE!")
+    return res;
+  }
+
+  getSetBitsPositions(num: number): number[] {
+    const binaryString = num.toString(2); // 将数字转换为二进制字符串
+    const setBitsPositions: number[] = [];
+
+    for (let i = binaryString.length - 1; i >= 0; i--) {
+      if (binaryString[i] === "1") {
+        setBitsPositions.push(binaryString.length - 1 - i);
+      }
+    }
+
+    return setBitsPositions;
+  }
+
+  async batchDraw(gameId: number): Promise<bigint[]> {
+    const start = Date.now();
+    let cardsToDeal = (
+      await this.smc.queryDeck(gameId)
+    ).cardsToDeal._data.toNumber();
+
+    const res = await this.batchDecrypt(
+      gameId,
+      this.getSetBitsPositions(cardsToDeal)
+    );
+    console.log("Batch Drawed in ", Date.now() - start, "ms");
+    return res;
   }
 
   async getOpenProof(gameId: number, cardIds: number[]) {
@@ -358,7 +472,7 @@ export class ZKShuffle implements IZKShuffle {
 
       proofs.push(packToSolidityProof(decryptProof.proof));
     }
-    console.log('generate open card proof in ', Date.now() - start, 'ms');
+    console.log("generate open card proof in ", Date.now() - start, "ms");
     return {
       cardMap: cardMap,
       decryptedCards: decryptedCards,
