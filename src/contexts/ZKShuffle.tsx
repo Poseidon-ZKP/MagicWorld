@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 // import useSigner from '../hooks/useSigner';
 import { ZKShuffle } from '../utils/shuffle/zkShuffle';
 import { dnld_crypto_files } from '../utils/shuffle/utility';
-import { useContracts } from './useContracts';
+import { useContracts } from '../hooks/useContracts';
 import { useSigner } from 'wagmi';
 import { set, get, clear } from 'idb-keyval';
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 
-function useZkShuffle() {
+export interface IZKShuffleContext {
+  zkShuffle: ZKShuffle;
+}
+
+export const ZKShuffleContext = createContext<IZKShuffleContext>(null);
+
+export function ZKShuffleProvider({ children }: { children: ReactNode }) {
   const { curChainConfig } = useContracts();
   const { data: signer } = useSigner();
 
@@ -44,8 +50,6 @@ function useZkShuffle() {
 
   // useEffect(() => {
   //   clear();
-
-  //   return () => {};
   // }, []);
 
   useEffect(() => {
@@ -84,11 +88,19 @@ function useZkShuffle() {
     getCacheData();
   }, [signer]);
 
-  return {
-    zkShuffle,
-    cacheCryptoFiles,
-    getCryptoFilesFromCache,
-  };
-}
+  return (
+    <ZKShuffleContext.Provider
+      value={{
+        zkShuffle,
+      }}
+    >
+      {children}
+    </ZKShuffleContext.Provider>
+  );
 
-export default useZkShuffle;
+  // return {
+  //   zkShuffle,
+  //   cacheCryptoFiles,
+  //   getCryptoFilesFromCache,
+  // };
+}

@@ -1,6 +1,6 @@
 import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 import { formatAddress } from '../utils/common';
 
@@ -10,7 +10,7 @@ import { arbitrumGoerli } from 'wagmi/chains';
 import StatusItem from '../components/StatusItem';
 import { useWrites } from '../hooks/useWrites';
 import useGame, { IGameStatus } from '../hooks/useGame';
-import useZkShuffle from '../hooks/useZkShuffle';
+import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import Button from '../components/Button';
 
 import noAvatar from '../assets/images/noAvatar.png';
@@ -42,7 +42,7 @@ export default function Home() {
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
   } = useWrites();
-  const { zkShuffle } = useZkShuffle();
+  const { zkShuffle } = useContext(ZKShuffleContext);
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
@@ -115,7 +115,7 @@ export default function Home() {
       </div>
     );
   }
-  console.log('zkShuffle', zkShuffle?.smc);
+  console.log('zkShuffle', zkShuffle);
   return (
     <div>
       <div
@@ -198,12 +198,12 @@ export default function Home() {
             </Button>
           )}
 
-          <Button
+          {/* <Button
             isError={creatorShuffleShuffleStatus.isError}
             isSuccess={creatorShuffleShuffleStatus.isSuccess}
             isLoading={creatorShuffleShuffleStatus.isLoading}
             onClick={async () => {
-              const res = await zkShuffle.generate_shuffle_proof('5');
+              const res = await zkShuffle.generate_shuffle_proof(5);
               console.log('res', res);
               // zkShuffle?.joinGame(creatorShuffleId);
               // debugger;
@@ -211,7 +211,7 @@ export default function Home() {
             }}
           >
             test
-          </Button>
+          </Button> */}
 
           {/* {gameStatus === IGameStatus.CREATOR_SHUFFLE_JOINED && (
             <Button

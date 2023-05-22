@@ -4,12 +4,10 @@ import {
   dealUncompressedCard,
   FullProof,
   generateDecryptProof,
+  generateShuffleEncryptV2Proof,
   packToSolidityProof,
   SolidityProof,
 } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
-// import snarkjs from 'snarkjs';
-
-const snarkjs = require('snarkjs');
 
 import {
   initDeck,
@@ -18,6 +16,7 @@ import {
   sampleFieldElements,
   samplePermutation,
   prepareDecryptData,
+  prepareShuffleDeck,
   // recoverDeck,
 } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/utilities';
 
@@ -49,87 +48,6 @@ export enum GameTurn {
   Open, // Open Card
   Complete, // Game End
   Error, // Game Error
-}
-
-export function recoverDeck(
-  babyjub: BabyJub,
-  X0: bigint[],
-  X1: bigint[]
-): { Delta0: bigint[]; Delta1: bigint[] } {
-  let Delta0: bigint[] = [];
-  let Delta1: bigint[] = [];
-
-  for (let i = 0; i < X0.length; i++) {
-    Delta0.push(ecX2Delta(babyjub, X0[i]));
-    Delta1.push(ecX2Delta(babyjub, X1[i]));
-  }
-
-  return { Delta0: Delta0, Delta1: Delta1 };
-}
-
-// Prepares deck queried from contract to the deck for generating ZK proof.
-export function prepareShuffleDeck(
-  babyjub: BabyJub,
-  deck: Deck,
-  numCards: number
-): { X0: bigint[]; X1: bigint[]; Selector: bigint[]; Delta: bigint[][] } {
-  let deckX0: bigint[] = [];
-  let deckX1: bigint[] = [];
-  for (let i = 0; i < numCards; i++) {
-    deckX0.push(deck.X0[i].toBigInt());
-  }
-  for (let i = 0; i < numCards; i++) {
-    deckX1.push(deck.X1[i].toBigInt());
-  }
-  let deckDelta = recoverDeck(babyjub, deckX0, deckX1);
-  return {
-    X0: deckX0,
-    X1: deckX1,
-    Selector: [
-      deck.selector0._data.toBigInt(),
-      deck.selector1._data.toBigInt(),
-    ],
-    Delta: [deckDelta.Delta0, deckDelta.Delta1],
-  };
-}
-
-export async function generateShuffleEncryptV2Proof(
-  pk: bigint[],
-  A: bigint[],
-  R: bigint[],
-  UX0: bigint[],
-  UX1: bigint[],
-  UDelta0: bigint[],
-  UDelta1: bigint[],
-  s_u: bigint[],
-  VX0: bigint[],
-  VX1: bigint[],
-  VDelta0: bigint[],
-  VDelta1: bigint[],
-  s_v: bigint[],
-  wasmFile: string,
-  zkeyFile: string
-): Promise<FullProof> {
-  debugger;
-  return <FullProof>await snarkjs.groth16.fullProve(
-    {
-      pk: pk,
-      A: A,
-      R: R,
-      UX0: UX0,
-      UX1: UX1,
-      UDelta0: UDelta0,
-      UDelta1: UDelta1,
-      VX0: VX0,
-      VX1: VX1,
-      VDelta0: VDelta0,
-      VDelta1: VDelta1,
-      s_u: s_u,
-      s_v: s_v,
-    },
-    wasmFile,
-    zkeyFile
-  );
 }
 
 interface IZKShuffle {

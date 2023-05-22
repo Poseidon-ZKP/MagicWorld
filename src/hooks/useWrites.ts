@@ -2,11 +2,12 @@ import { useMutation } from '@tanstack/react-query';
 
 import { useContracts } from './useContracts';
 import useWriteContract from './useWriteContract';
-import useZkShuffle from './useZkShuffle';
+import { useContext } from 'react';
+import { ZKShuffleContext } from '../contexts/ZKShuffle';
 
 export const useWrites = () => {
   const { hs } = useContracts();
-  const { zkShuffle } = useZkShuffle();
+  const { zkShuffle } = useContext(ZKShuffleContext);
   const createGameStatus = useWriteContract(hs?.createShuffleForCreator, {});
   const joinGameStatus = useWriteContract(hs?.createShuffleForJoiner, {});
 

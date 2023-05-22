@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useContracts } from './useContracts';
 import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useBlockNumber, useNetwork } from 'wagmi';
 import { config } from '../config';
-import useZkShuffle from './useZkShuffle';
+import useZkShuffle, { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { shuffle } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
 // export interface UseGame {
@@ -36,12 +36,13 @@ function useGame(creator: string, joiner: string, address: string) {
     GameTurn.NOP
   );
 
-  const { zkShuffle } = useZkShuffle();
+  const { zkShuffle } = useContext(ZKShuffleContext);
 
   const createGameListener = useEvent({
     contract: hs,
     filter: hs?.filters?.CreateGame(null, null, null),
     isStop: gameStatus !== IGameStatus.WAIT_START,
+    // isStop: true,
     addressIndex: 2,
     others: {
       creator: creator,
@@ -54,6 +55,7 @@ function useGame(creator: string, joiner: string, address: string) {
     contract: hs,
     filter: hs?.filters?.JoinGame(null, null, null),
     isStop: gameStatus !== IGameStatus.CREATED,
+    // isStop: true,
     addressIndex: 2,
     others: {
       creator: creator,
@@ -96,6 +98,7 @@ function useGame(creator: string, joiner: string, address: string) {
       setInterval(async () => {
         const startBlock = blockNumber - BLOCK_INTERVAL;
         const res = await zkShuffle.checkTurn(creatorShuffleId, startBlock);
+        console.log('res', res);
         setCreatorShuffleStatus(res);
       }, PULL_DATA_TIME);
     }
