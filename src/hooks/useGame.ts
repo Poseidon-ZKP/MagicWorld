@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { use, useContext, useEffect, useMemo, useState } from 'react';
 import { useContracts } from './useContracts';
 import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
@@ -20,6 +20,11 @@ export enum IGameStatus {
   JOINER_SHUFFLE_JOINED,
   CREATOR_SHUFFLE_SHUFFLED,
   JOINER_SHUFFLE_SHUFFLED,
+  DRAWED,
+}
+export enum Turn {
+  Creator,
+  Joiner,
 }
 
 export const BLOCK_INTERVAL = 150;
@@ -36,6 +41,7 @@ function useGame(creator: string, joiner: string, address: string) {
   const [joinerShuffleStatus, setJoinerShuffleStatus] = useState<GameTurn>(
     GameTurn.NOP
   );
+  const [turn, setTurn] = useState<Turn>();
 
   const [creatorList, setCreatorList] = useState(list);
   const [joinerList, setJoinerList] = useState(list);
@@ -68,18 +74,31 @@ function useGame(creator: string, joiner: string, address: string) {
     },
   });
 
-  // const chooseCardGameListener = useEvent({
-  //   contract: hs,
-  //   filter: hs?.filters?.ChooseCard(null, null, null, null),
-  //   isStop: gameStatus !== IGameStatus.CREATED,
-  //   // isStop: true,
-  //   addressIndex: 1,
-  //   others: {
-  //     creator: creator,
-  //     joiner: joiner,
-  //     // gameId,
-  //   },
-  // });
+  const nextPlayerListener = useEvent({
+    contract: hs,
+    filter: hs?.filters?.NextPlayer(null, null, null),
+    isStop: gameStatus !== IGameStatus.JOINED,
+    // isStop: true,
+    addressIndex: 1,
+    others: {
+      creator: creator,
+      joiner: joiner,
+      // gameId,
+    },
+  });
+
+  const chooseCardGameListener = useEvent({
+    contract: hs,
+    filter: hs?.filters?.ChooseCard(null, null, null, null),
+    // isStop: gameStatus !== IGameStatus.CREATED,
+    isStop: true,
+    addressIndex: 1,
+    others: {
+      creator: creator,
+      joiner: joiner,
+      // gameId,
+    },
+  });
 
   // const joinGameListener = useEvent({
   //   contract: hs,
@@ -158,18 +177,32 @@ function useGame(creator: string, joiner: string, address: string) {
     }
   }, [joinGameListener?.joiner]);
 
-  // useEffect(() => {
-  //   if (chooseCardGameListener?.creator) {
-  //     const cardIndex = chooseCardGameListener?.creator?.[3]?.toString();
-  //     creatorList[cardIndex].isFlipped = true;
-  //     setCreatorList([...creatorList]);
-  //   }
-  //   if (chooseCardGameListener?.joiner) {
-  //     const cardIndex = chooseCardGameListener?.joiner?.[3]?.toString();
-  //     joinerList[cardIndex].isFlipped = true;
-  //     setJoinerList([...joinerList]);
-  //   }
-  // }, [chooseCardGameListener?.creator, chooseCardGameListener?.joiner]);
+  useEffect(() => {
+    if (nextPlayerListener?.creator) {
+      setTurn(Turn.Creator);
+      // setGameStatus(IGameStatus.DRAWED);
+    }
+    if (nextPlayerListener?.joiner) {
+      setTurn(Turn.Joiner);
+      // setGameStatus(IGameStatus.DRAWED);
+    }
+    if (nextPlayerListener?.creator && nextPlayerListener?.joiner) {
+      setGameStatus(IGameStatus.DRAWED);
+    }
+  }, [nextPlayerListener?.creator, nextPlayerListener?.joiner]);
+  console.log('nextPlayerListener', nextPlayerListener);
+  useEffect(() => {
+    if (chooseCardGameListener?.creator) {
+      const cardIndex = chooseCardGameListener?.creator?.[3]?.toString();
+      creatorList[cardIndex].isChoose = true;
+      setCreatorList([...creatorList]);
+    }
+    if (chooseCardGameListener?.joiner) {
+      const cardIndex = chooseCardGameListener?.joiner?.[3]?.toString();
+      joinerList[cardIndex].isChoose = true;
+      setJoinerList([...joinerList]);
+    }
+  }, [chooseCardGameListener?.creator, chooseCardGameListener?.joiner]);
 
   // get game status
   useEffect(() => {
@@ -228,8 +261,11 @@ function useGame(creator: string, joiner: string, address: string) {
     // }
   }, [joinerShuffleStatus, creatorShuffleStatus]);
 
+  console.log('turn ', turn);
+  console.log('gameStatus', gameStatus);
   return {
     hsId,
+    turn,
     creatorShuffleId,
     joinerShuffleId,
     gameStatus,

@@ -6,7 +6,11 @@ import ReactCardFlip, { ReactFlipCardProps } from 'react-card-flip';
 import styles from './style.module.css';
 
 export interface CardProps extends Omit<ReactFlipCardProps, 'children'> {
-  cardValue?: string;
+  cardValue?: {
+    img: string;
+    attack: number;
+    defense: number;
+  };
   isLoading?: boolean;
   isDisabled?: boolean;
   isError?: boolean;
@@ -42,6 +46,7 @@ export const list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => {
     attack: null,
     defense: null,
     isFlipped: false,
+    isChoose: false,
   };
 });
 
@@ -121,11 +126,20 @@ function Index({
 
       <div
         onClick={onClickBack}
-        className={`flex justify-center items-center w-[14rem] h-[14rem]  rounded-2xl ${styles.box} `}
+        className={`flex relative justify-center items-center w-[14rem] h-[14rem]  rounded-2xl ${styles.box} `}
       >
+        <div
+          className={
+            'absolute flex flex-col w-full h-full justify-center items-center'
+          }
+        >
+          <div className="text-xl">attack:{cardValue.attack}</div>
+          <div className="text-xl">defense:{cardValue.defense}</div>
+        </div>
+
         <img
           className="rounded-2xl"
-          src={cardValue}
+          src={cardValue.img}
           width="100%"
           height="100%"
           alt=""

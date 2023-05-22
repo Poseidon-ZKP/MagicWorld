@@ -62,10 +62,11 @@ export interface HearthStoneInterface extends utils.Interface {
     "chooseCard(uint256,uint256,uint256)": FunctionFragment;
     "createShuffleForCreator(uint256,uint256)": FunctionFragment;
     "createShuffleForJoiner(uint256,uint256,uint256)": FunctionFragment;
-    "dealCardsToPlayer(uint256)": FunctionFragment;
+    "dealCardsToPlayer(uint256,uint256)": FunctionFragment;
     "getGameInfo(uint256)": FunctionFragment;
     "largestHSId()": FunctionFragment;
-    "moveToShuffleStage(uint256)": FunctionFragment;
+    "moveToChooseStage(uint256)": FunctionFragment;
+    "moveToShuffleStage(uint256,uint256)": FunctionFragment;
     "settle(uint256,uint256,uint256)": FunctionFragment;
     "shuffle()": FunctionFragment;
   };
@@ -80,6 +81,7 @@ export interface HearthStoneInterface extends utils.Interface {
       | "dealCardsToPlayer"
       | "getGameInfo"
       | "largestHSId"
+      | "moveToChooseStage"
       | "moveToShuffleStage"
       | "settle"
       | "shuffle"
@@ -115,7 +117,7 @@ export interface HearthStoneInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "dealCardsToPlayer",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "getGameInfo",
@@ -126,8 +128,12 @@ export interface HearthStoneInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "moveToShuffleStage",
+    functionFragment: "moveToChooseStage",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "moveToShuffleStage",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "settle",
@@ -166,6 +172,10 @@ export interface HearthStoneInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "moveToChooseStage",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "moveToShuffleStage",
     data: BytesLike
   ): Result;
@@ -175,9 +185,10 @@ export interface HearthStoneInterface extends utils.Interface {
   events: {
     "ChooseCard(uint256,address,uint256,uint256)": EventFragment;
     "CreateGame(uint256,uint256,address)": EventFragment;
-    "EndGame(uint256,uint256)": EventFragment;
+    "EndGame(uint256,address,uint256)": EventFragment;
     "JoinGame(uint256,uint256,address)": EventFragment;
-    "NextPlayer(uint256,uint256)": EventFragment;
+    "NextPlayer(uint256,address,uint256)": EventFragment;
+    "OpenCard(uint256,address,uint256,uint256,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "ChooseCard"): EventFragment;
@@ -185,6 +196,7 @@ export interface HearthStoneInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "EndGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "JoinGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NextPlayer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OpenCard"): EventFragment;
 }
 
 export interface ChooseCardEventObject {
@@ -214,10 +226,11 @@ export type CreateGameEventFilter = TypedEventFilter<CreateGameEvent>;
 
 export interface EndGameEventObject {
   hsId: BigNumber;
+  player: string;
   playerIdx: BigNumber;
 }
 export type EndGameEvent = TypedEvent<
-  [BigNumber, BigNumber],
+  [BigNumber, string, BigNumber],
   EndGameEventObject
 >;
 
@@ -237,14 +250,29 @@ export type JoinGameEventFilter = TypedEventFilter<JoinGameEvent>;
 
 export interface NextPlayerEventObject {
   hsId: BigNumber;
+  player: string;
   playerIdx: BigNumber;
 }
 export type NextPlayerEvent = TypedEvent<
-  [BigNumber, BigNumber],
+  [BigNumber, string, BigNumber],
   NextPlayerEventObject
 >;
 
 export type NextPlayerEventFilter = TypedEventFilter<NextPlayerEvent>;
+
+export interface OpenCardEventObject {
+  hsId: BigNumber;
+  player: string;
+  playerIdx: BigNumber;
+  cardIdx: BigNumber;
+  cardValue: BigNumber;
+}
+export type OpenCardEvent = TypedEvent<
+  [BigNumber, string, BigNumber, BigNumber, BigNumber],
+  OpenCardEventObject
+>;
+
+export type OpenCardEventFilter = TypedEventFilter<OpenCardEvent>;
 
 export interface HearthStone extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -298,6 +326,7 @@ export interface HearthStone extends BaseContract {
     ): Promise<ContractTransaction>;
 
     dealCardsToPlayer(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -309,7 +338,13 @@ export interface HearthStone extends BaseContract {
 
     largestHSId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    moveToChooseStage(
+      hsId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     moveToShuffleStage(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -349,6 +384,7 @@ export interface HearthStone extends BaseContract {
   ): Promise<ContractTransaction>;
 
   dealCardsToPlayer(
+    hsId: PromiseOrValue<BigNumberish>,
     shuffleId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -360,7 +396,13 @@ export interface HearthStone extends BaseContract {
 
   largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
+  moveToChooseStage(
+    hsId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   moveToShuffleStage(
+    hsId: PromiseOrValue<BigNumberish>,
     shuffleId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -400,6 +442,7 @@ export interface HearthStone extends BaseContract {
     ): Promise<void>;
 
     dealCardsToPlayer(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -411,7 +454,13 @@ export interface HearthStone extends BaseContract {
 
     largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
+    moveToChooseStage(
+      hsId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     moveToShuffleStage(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -451,12 +500,14 @@ export interface HearthStone extends BaseContract {
       creator?: null
     ): CreateGameEventFilter;
 
-    "EndGame(uint256,uint256)"(
+    "EndGame(uint256,address,uint256)"(
       hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
       playerIdx?: null
     ): EndGameEventFilter;
     EndGame(
       hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
       playerIdx?: null
     ): EndGameEventFilter;
 
@@ -471,14 +522,31 @@ export interface HearthStone extends BaseContract {
       joiner?: null
     ): JoinGameEventFilter;
 
-    "NextPlayer(uint256,uint256)"(
+    "NextPlayer(uint256,address,uint256)"(
       hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
       playerIdx?: null
     ): NextPlayerEventFilter;
     NextPlayer(
       hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
       playerIdx?: null
     ): NextPlayerEventFilter;
+
+    "OpenCard(uint256,address,uint256,uint256,uint256)"(
+      hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
+      playerIdx?: null,
+      cardIdx?: null,
+      cardValue?: null
+    ): OpenCardEventFilter;
+    OpenCard(
+      hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
+      playerIdx?: null,
+      cardIdx?: null,
+      cardValue?: null
+    ): OpenCardEventFilter;
   };
 
   estimateGas: {
@@ -507,6 +575,7 @@ export interface HearthStone extends BaseContract {
     ): Promise<BigNumber>;
 
     dealCardsToPlayer(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -518,7 +587,13 @@ export interface HearthStone extends BaseContract {
 
     largestHSId(overrides?: CallOverrides): Promise<BigNumber>;
 
+    moveToChooseStage(
+      hsId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     moveToShuffleStage(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -559,6 +634,7 @@ export interface HearthStone extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     dealCardsToPlayer(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -570,7 +646,13 @@ export interface HearthStone extends BaseContract {
 
     largestHSId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    moveToChooseStage(
+      hsId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     moveToShuffleStage(
+      hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

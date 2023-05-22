@@ -148,13 +148,26 @@ export default function Home() {
             </div>
           </div>
           <div className="w-[96rem]  flex flex-1  flex-row gap-2 overflow-x-auto ">
+            <Card
+              cardValue={{
+                img: wizard.src,
+                attack: 5,
+                defense: 2,
+              }}
+              isFlipped
+            />
             {creatorList.map((item) => {
               return (
                 <Card
-                  cardValue={wizard.src}
+                  cardValue={{
+                    img: wizard.src,
+                    attack: 5,
+                    defense: 2,
+                  }}
                   isFlipped={item.isFlipped}
                   key={item.index}
                   // isLoading={true}
+                  // isChoose
                   onClickFrond={() => {
                     setSelectCreatorCard(item.index);
                   }}
