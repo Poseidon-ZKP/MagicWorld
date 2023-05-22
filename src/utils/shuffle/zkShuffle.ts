@@ -160,6 +160,7 @@ export class ZKShuffle implements IZKShuffle {
   }
 
   async checkTurn(gameId: number, startBlock: any = 0): Promise<GameTurn> {
+    debugger;
     if (startBlock == undefined || startBlock == 0) {
       startBlock = this.nextBlockPerGame.get(gameId);
       if (startBlock == undefined) {
@@ -172,12 +173,15 @@ export class ZKShuffle implements IZKShuffle {
     for (let i = 0; i < events.length; i++) {
       const e = events[i];
       startBlock = e.blockNumber + 1; // TODO : probably missing event in same block
+      const playerId = await this.getPlayerId(gameId);
+
       if (
         e?.args?.gameId.toNumber() != gameId ||
-        e?.args?.playerIndex.toNumber() != (await this.getPlayerId(gameId))
+        e?.args?.playerIndex.toNumber() != playerId
       ) {
         continue;
       }
+
       this.nextBlockPerGame.set(gameId, startBlock);
       switch (e.args.state) {
         case BaseState.Shuffle:
@@ -206,7 +210,6 @@ export class ZKShuffle implements IZKShuffle {
     const key = await this.smc.queryAggregatedPk(gameId);
     const aggrPK = [key[0].toBigInt(), key[1].toBigInt()];
     const aggrPKEC = [this.babyjub.F.e(aggrPK[0]), this.babyjub.F.e(aggrPK[1])];
-    debugger;
     let deck = await this.smc.queryDeck(gameId);
     let preprocessedDeck = prepareShuffleDeck(this.babyjub, deck, numCards);
     let A = samplePermutation(Number(numCards));

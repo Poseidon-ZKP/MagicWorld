@@ -14,6 +14,37 @@ export interface CardProps extends Omit<ReactFlipCardProps, 'children'> {
   onClickFrond?: () => void;
   onClickBack?: () => void;
 }
+export enum ICardType {
+  Wizard,
+  Warrior,
+  Tank,
+  None,
+}
+export const cardConfig = {
+  [ICardType.Wizard]: {
+    attack: 16,
+    defense: 5,
+  },
+  [ICardType.Warrior]: {
+    attack: 11,
+    defense: 10,
+  },
+  [ICardType.Wizard]: {
+    attack: 3,
+    defense: 10,
+  },
+};
+
+export const list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => {
+  return {
+    index: item,
+    cardValue: ICardType.None,
+    attack: null,
+    defense: null,
+    isFlipped: false,
+  };
+});
+
 function Index({
   cardValue,
   isFlipped,

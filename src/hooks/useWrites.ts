@@ -34,6 +34,12 @@ export const useWrites = () => {
     },
   });
 
+  const batchDrawStatus = useMutation({
+    mutationFn: (gameId: number) => {
+      return zkShuffle?.batchDraw(gameId);
+    },
+  });
+
   return {
     createGameStatus,
     joinGameStatus,
@@ -41,5 +47,6 @@ export const useWrites = () => {
     joinerShuffleJoinStatus,
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
+    batchDrawStatus,
   };
 };

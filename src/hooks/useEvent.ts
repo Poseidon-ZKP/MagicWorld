@@ -20,7 +20,7 @@ export interface UseEventProps {
   // joiner: string;
 }
 
-export const PULL_DATA_TIME = 2000;
+export const PULL_DATA_TIME = 5000;
 
 function useEvent({
   contract,

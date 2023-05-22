@@ -1,6 +1,6 @@
 import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Image from 'next/image';
 import { formatAddress } from '../utils/common';
 
@@ -20,7 +20,7 @@ import tank from '../assets/images/tank.jpeg';
 import warrior from '../assets/images/warrior.jpeg';
 import wizard from '../assets/images/wizard.jpeg';
 
-import Card from '../components/Card';
+import Card, { list } from '../components/Card';
 
 import styles from '../styles/Home.module.css';
 
@@ -41,16 +41,22 @@ export default function Home() {
     // joinerShuffleJoinStatus,
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
+    batchDrawStatus,
   } = useWrites();
   const { zkShuffle } = useContext(ZKShuffleContext);
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
-  const { hsId, creatorShuffleId, joinerShuffleId, gameStatus } = useGame(
-    creator,
-    joiner,
-    address
-  );
+  const {
+    hsId,
+    creatorShuffleId,
+    creatorList,
+    joinerList,
+    joinerShuffleId,
+    gameStatus,
+  } = useGame(creator, joiner, address);
+  const [selectCreatorCard, setSelectCreatorCard] = useState<number>();
+  const [selectJoinerCard, setSelectJoinerCard] = useState<number>();
 
   if (!router.isReady) {
     return (
@@ -61,10 +67,7 @@ export default function Home() {
   }
 
   const isCreator = address === creator;
-  const userIndex = {
-    creator: isCreator ? 0 : 1,
-    joiner: isCreator ? 1 : 0,
-  };
+  const batchShuffleId = isCreator ? joinerShuffleId : creatorShuffleId;
   // if (!creator || !joiner) {
   //   return (
   //     <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
@@ -115,7 +118,9 @@ export default function Home() {
       </div>
     );
   }
-  console.log('zkShuffle', zkShuffle);
+
+  console.log('gameStatus', gameStatus);
+
   return (
     <div>
       <div
@@ -143,16 +148,19 @@ export default function Home() {
             </div>
           </div>
           <div className="w-[96rem]  flex flex-1  flex-row gap-2 overflow-x-auto ">
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={warrior.src} isFlipped />
-            <Card cardValue={warrior.src} isFlipped />
+            {creatorList.map((item) => {
+              return (
+                <Card
+                  cardValue={wizard.src}
+                  isFlipped={item.isFlipped}
+                  key={item.index}
+                  // isLoading={true}
+                  onClickFrond={() => {
+                    setSelectCreatorCard(item.index);
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
         <div className="m-1 flex flex-row w-full gap-4 items-center">
@@ -184,18 +192,42 @@ export default function Home() {
           )}
 
           {gameStatus === IGameStatus.JOINED && (
-            <Button
-              isError={creatorShuffleShuffleStatus.isError}
-              isSuccess={creatorShuffleShuffleStatus.isSuccess}
-              isLoading={creatorShuffleShuffleStatus.isLoading}
-              onClick={() => {
-                // zkShuffle?.joinGame(creatorShuffleId);
-                debugger;
-                creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
-              }}
-            >
-              Creator shuffle shuffle
-            </Button>
+            <>
+              <Button
+                isError={creatorShuffleShuffleStatus.isError}
+                isSuccess={creatorShuffleShuffleStatus.isSuccess}
+                isLoading={creatorShuffleShuffleStatus.isLoading}
+                onClick={() => {
+                  creatorShuffleShuffleStatus.mutateAsync(
+                    Number(creatorShuffleId)
+                  );
+                }}
+              >
+                Creator shuffle shuffle
+              </Button>
+              <Button
+                isError={joinerShuffleShuffleStatus.isError}
+                isSuccess={joinerShuffleShuffleStatus.isSuccess}
+                isLoading={joinerShuffleShuffleStatus.isLoading}
+                onClick={() => {
+                  // zkShuffle?.joinGame(creatorShuffleId);
+                  joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                }}
+              >
+                Joiner shuffle shuffle
+              </Button>
+              <Button
+                isError={batchDrawStatus.isError}
+                isSuccess={batchDrawStatus.isSuccess}
+                isLoading={batchDrawStatus.isLoading}
+                onClick={() => {
+                  // zkShuffle?.joinGame(creatorShuffleId);
+                  batchDrawStatus.mutateAsync(batchShuffleId);
+                }}
+              >
+                Batch draw
+              </Button>
+            </>
           )}
 
           {/* <Button
@@ -239,7 +271,7 @@ export default function Home() {
             >
               Creator shuffle shuffle
             </Button>
-          )}
+          )} */}
 
           {gameStatus === IGameStatus.CREATOR_SHUFFLE_SHUFFLED && (
             <Button
@@ -253,13 +285,22 @@ export default function Home() {
             >
               Joiner shuffle shuffle
             </Button>
-          )} */}
+          )}
 
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
         </div>
         <div className="flex w-full flex-col items-center justify-center gap-5">
           <div className="w-[96rem] flex flex-1  flex-row gap-2 overflow-x-auto ">
-            <Card cardValue={wizard.src} isFlipped />
+            {joinerList.map((item) => {
+              return (
+                <Card
+                  cardValue={wizard.src}
+                  isFlipped={item.isFlipped}
+                  key={item.index}
+                />
+              );
+            })}
+            {/* <Card cardValue={wizard.src} isFlipped />
             <Card cardValue={wizard.src} isFlipped />
             <Card cardValue={wizard.src} isFlipped />
             <Card cardValue={wizard.src} isFlipped />
@@ -268,7 +309,7 @@ export default function Home() {
             <Card cardValue={tank.src} isFlipped />
             <Card cardValue={tank.src} isFlipped />
             <Card cardValue={warrior.src} isFlipped />
-            <Card cardValue={warrior.src} isFlipped />
+            <Card cardValue={warrior.src} isFlipped /> */}
           </div>
 
           {/* <Image src={noAvatar.src} width={120} height={120} alt="" /> */}
