@@ -1,4 +1,5 @@
-import { use, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { useContracts } from './useContracts';
 import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
@@ -6,7 +7,8 @@ import { config } from '../config';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { shuffle } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
-import { list } from '../components/Card';
+import { cardConfig, list } from '../components/Card';
+import { useWrites } from './useWrites';
 // export interface UseGame {
 //   creator: string;
 //   joiner: string;
@@ -21,11 +23,20 @@ export enum IGameStatus {
   CREATOR_SHUFFLE_SHUFFLED,
   JOINER_SHUFFLE_SHUFFLED,
   DRAWED,
+  CREATOR_CHOOSED,
+  CREATOR_OPENED,
+  JOINER_CHOOSED,
+  JOINER_OPENED,
 }
 export enum Turn {
   Creator,
   Joiner,
 }
+
+// export enum PlayerIndex {
+//   Creator,
+//   Joiner,
+// }
 
 export const BLOCK_INTERVAL = 150;
 
@@ -41,12 +52,23 @@ function useGame(creator: string, joiner: string, address: string) {
   const [joinerShuffleStatus, setJoinerShuffleStatus] = useState<GameTurn>(
     GameTurn.NOP
   );
-  const [turn, setTurn] = useState<Turn>();
 
-  const [creatorList, setCreatorList] = useState(list);
-  const [joinerList, setJoinerList] = useState(list);
+  const [creatorList, setCreatorList] = useState(cloneDeep(list));
+  const [joinerList, setJoinerList] = useState(cloneDeep(list));
 
   const { zkShuffle } = useContext(ZKShuffleContext);
+
+  const {
+    createGameStatus,
+    joinGameStatus,
+    // creatorShuffleJoinStatus,
+    // joinerShuffleJoinStatus,
+    creatorShuffleShuffleStatus,
+    joinerShuffleShuffleStatus,
+    batchDrawStatus,
+    openStatus,
+    chooseCardStatus,
+  } = useWrites();
 
   const createGameListener = useEvent({
     contract: hs,
@@ -74,9 +96,9 @@ function useGame(creator: string, joiner: string, address: string) {
     },
   });
 
-  const nextPlayerListener = useEvent({
+  const dealEndListener = useEvent({
     contract: hs,
-    filter: hs?.filters?.NextPlayer(null, null, null),
+    filter: hs?.filters?.DealEnd(null, null, null),
     isStop: gameStatus !== IGameStatus.JOINED,
     // isStop: true,
     addressIndex: 1,
@@ -90,8 +112,25 @@ function useGame(creator: string, joiner: string, address: string) {
   const chooseCardGameListener = useEvent({
     contract: hs,
     filter: hs?.filters?.ChooseCard(null, null, null, null),
-    // isStop: gameStatus !== IGameStatus.CREATED,
-    isStop: true,
+    isStop:
+      gameStatus !== IGameStatus.DRAWED &&
+      gameStatus !== IGameStatus.CREATOR_OPENED,
+    // isStop: true,
+    addressIndex: 1,
+    others: {
+      creator: creator,
+      joiner: joiner,
+      // gameId,
+    },
+  });
+
+  const openCardListener = useEvent({
+    contract: hs,
+    filter: hs?.filters?.OpenCard(null, null, null, null, null),
+    isStop:
+      gameStatus !== IGameStatus.CREATOR_CHOOSED &&
+      gameStatus !== IGameStatus.JOINER_CHOOSED,
+    // isStop: true,
     addressIndex: 1,
     others: {
       creator: creator,
@@ -159,11 +198,11 @@ function useGame(creator: string, joiner: string, address: string) {
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
-  const handleOpenCard = async (index: number) => {
-    try {
-      const chooseCard = await hs?.chooseCard(hsId, 0, index);
-    } catch (error) {}
-  };
+  // const handleOpenCard = async (index: number) => {
+  //   try {
+  //     const chooseCard = await hs?.chooseCard(hsId, 0, index);
+  //   } catch (error) {}
+  // };
 
   useEffect(() => {
     if (createGameListener?.creator) {
@@ -178,31 +217,64 @@ function useGame(creator: string, joiner: string, address: string) {
   }, [joinGameListener?.joiner]);
 
   useEffect(() => {
-    if (nextPlayerListener?.creator) {
-      setTurn(Turn.Creator);
-      // setGameStatus(IGameStatus.DRAWED);
-    }
-    if (nextPlayerListener?.joiner) {
-      setTurn(Turn.Joiner);
-      // setGameStatus(IGameStatus.DRAWED);
-    }
-    if (nextPlayerListener?.creator && nextPlayerListener?.joiner) {
+    if (dealEndListener?.creator && dealEndListener?.joiner) {
       setGameStatus(IGameStatus.DRAWED);
     }
-  }, [nextPlayerListener?.creator, nextPlayerListener?.joiner]);
-  console.log('nextPlayerListener', nextPlayerListener);
+  }, [dealEndListener?.creator, dealEndListener?.joiner]);
+
   useEffect(() => {
     if (chooseCardGameListener?.creator) {
       const cardIndex = chooseCardGameListener?.creator?.[3]?.toString();
       creatorList[cardIndex].isChoose = true;
+      setGameStatus(IGameStatus.CREATOR_CHOOSED);
       setCreatorList([...creatorList]);
     }
+  }, [chooseCardGameListener?.creator]);
+
+  useEffect(() => {
     if (chooseCardGameListener?.joiner) {
       const cardIndex = chooseCardGameListener?.joiner?.[3]?.toString();
       joinerList[cardIndex].isChoose = true;
+      setGameStatus(IGameStatus.JOINER_CHOOSED);
       setJoinerList([...joinerList]);
     }
+  }, [chooseCardGameListener?.joiner]);
+
+  useEffect(() => {
+    if (chooseCardGameListener?.creator && chooseCardGameListener?.joiner) {
+      chooseCardGameListener.reset();
+    }
   }, [chooseCardGameListener?.creator, chooseCardGameListener?.joiner]);
+
+  useEffect(() => {
+    if (openCardListener?.creator) {
+      const cardIndex = openCardListener?.creator?.[3]?.toString();
+      const cardValue = openCardListener?.creator?.[4]?.toString();
+      creatorList[cardIndex].cardValue = Math.floor(cardValue / 10);
+      creatorList[cardIndex].isFlipped = true;
+      setGameStatus(IGameStatus.CREATOR_OPENED);
+      setCreatorList([...creatorList]);
+    }
+  }, [openCardListener?.creator]);
+
+  useEffect(() => {
+    if (openCardListener?.joiner) {
+      const cardIndex = openCardListener?.joiner?.[3]?.toString();
+      const cardValue = openCardListener?.joiner?.[4]?.toString();
+      joinerList[cardIndex].cardValue = Math.floor(cardValue / 10);
+      joinerList[cardIndex].isFlipped = true;
+      setGameStatus(IGameStatus.JOINER_OPENED);
+      setJoinerList([...joinerList]);
+    }
+  }, [openCardListener?.joiner]);
+
+  useEffect(() => {
+    if (openCardListener?.creator && openCardListener?.joiner) {
+      openCardListener.reset();
+      openStatus.reset();
+      setGameStatus(IGameStatus.DRAWED);
+    }
+  }, [openCardListener?.creator, openCardListener?.joiner]);
 
   // get game status
   useEffect(() => {
@@ -261,17 +333,23 @@ function useGame(creator: string, joiner: string, address: string) {
     // }
   }, [joinerShuffleStatus, creatorShuffleStatus]);
 
-  console.log('turn ', turn);
   console.log('gameStatus', gameStatus);
   return {
     hsId,
-    turn,
     creatorShuffleId,
     joinerShuffleId,
     gameStatus,
     createGameListener,
     creatorList,
     joinerList,
+    createGameStatus,
+    joinGameStatus,
+
+    creatorShuffleShuffleStatus,
+    joinerShuffleShuffleStatus,
+    batchDrawStatus,
+    openStatus,
+    chooseCardStatus,
   };
 }
 

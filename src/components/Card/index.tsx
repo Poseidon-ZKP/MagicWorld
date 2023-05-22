@@ -3,6 +3,10 @@ import Image from 'next/image';
 
 import ReactCardFlip, { ReactFlipCardProps } from 'react-card-flip';
 
+import tank from '../../assets/images/tank.jpeg';
+import warrior from '../../assets/images/warrior.jpeg';
+import wizard from '../../assets/images/wizard.jpeg';
+
 import styles from './style.module.css';
 
 export interface CardProps extends Omit<ReactFlipCardProps, 'children'> {
@@ -28,14 +32,17 @@ export const cardConfig = {
   [ICardType.Wizard]: {
     attack: 16,
     defense: 5,
+    img: wizard.src,
   },
   [ICardType.Warrior]: {
     attack: 11,
     defense: 10,
+    img: warrior.src,
   },
-  [ICardType.Wizard]: {
+  [ICardType.Tank]: {
     attack: 3,
-    defense: 10,
+    defense: 18,
+    img: tank.src,
   },
 };
 
@@ -133,13 +140,13 @@ function Index({
             'absolute flex flex-col w-full h-full justify-center items-center'
           }
         >
-          <div className="text-xl">attack:{cardValue.attack}</div>
-          <div className="text-xl">defense:{cardValue.defense}</div>
+          <div className="text-xl">attack:{cardValue?.attack || '--'}</div>
+          <div className="text-xl">defense:{cardValue?.defense || '--'}</div>
         </div>
 
         <img
           className="rounded-2xl"
-          src={cardValue.img}
+          src={cardValue?.img}
           width="100%"
           height="100%"
           alt=""

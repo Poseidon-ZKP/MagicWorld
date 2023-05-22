@@ -10,6 +10,7 @@ export const useWrites = () => {
   const { zkShuffle } = useContext(ZKShuffleContext);
   const createGameStatus = useWriteContract(hs?.createShuffleForCreator, {});
   const joinGameStatus = useWriteContract(hs?.createShuffleForJoiner, {});
+  const chooseCardStatus = useWriteContract(hs?.chooseCard, {});
 
   const creatorShuffleJoinStatus = useMutation({
     mutationFn: (shuffleId: number) => {
@@ -40,6 +41,18 @@ export const useWrites = () => {
     },
   });
 
+  const openStatus = useMutation({
+    mutationFn: ({
+      shuffleId,
+      cardIds,
+    }: {
+      shuffleId: number;
+      cardIds: number[];
+    }) => {
+      return zkShuffle?.open(shuffleId, cardIds);
+    },
+  });
+
   return {
     createGameStatus,
     joinGameStatus,
@@ -48,5 +61,7 @@ export const useWrites = () => {
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
     batchDrawStatus,
+    openStatus,
+    chooseCardStatus,
   };
 };

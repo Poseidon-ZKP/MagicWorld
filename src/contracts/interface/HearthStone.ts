@@ -62,11 +62,11 @@ export interface HearthStoneInterface extends utils.Interface {
     "chooseCard(uint256,uint256,uint256)": FunctionFragment;
     "createShuffleForCreator(uint256,uint256)": FunctionFragment;
     "createShuffleForJoiner(uint256,uint256,uint256)": FunctionFragment;
-    "dealCardsToPlayer(uint256,uint256)": FunctionFragment;
+    "dealCardsToPlayer(uint256,uint256,uint256)": FunctionFragment;
     "getGameInfo(uint256)": FunctionFragment;
     "largestHSId()": FunctionFragment;
-    "moveToChooseStage(uint256)": FunctionFragment;
-    "moveToShuffleStage(uint256,uint256)": FunctionFragment;
+    "moveToChooseStage(uint256,uint256)": FunctionFragment;
+    "moveToShuffleStage(uint256,uint256,uint256)": FunctionFragment;
     "settle(uint256,uint256,uint256)": FunctionFragment;
     "shuffle()": FunctionFragment;
   };
@@ -117,7 +117,11 @@ export interface HearthStoneInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "dealCardsToPlayer",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getGameInfo",
@@ -129,11 +133,15 @@ export interface HearthStoneInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "moveToChooseStage",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "moveToShuffleStage",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "settle",
@@ -185,6 +193,7 @@ export interface HearthStoneInterface extends utils.Interface {
   events: {
     "ChooseCard(uint256,address,uint256,uint256)": EventFragment;
     "CreateGame(uint256,uint256,address)": EventFragment;
+    "DealEnd(uint256,address,uint256)": EventFragment;
     "EndGame(uint256,address,uint256)": EventFragment;
     "JoinGame(uint256,uint256,address)": EventFragment;
     "NextPlayer(uint256,address,uint256)": EventFragment;
@@ -193,6 +202,7 @@ export interface HearthStoneInterface extends utils.Interface {
 
   getEvent(nameOrSignatureOrTopic: "ChooseCard"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreateGame"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealEnd"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EndGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "JoinGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NextPlayer"): EventFragment;
@@ -223,6 +233,18 @@ export type CreateGameEvent = TypedEvent<
 >;
 
 export type CreateGameEventFilter = TypedEventFilter<CreateGameEvent>;
+
+export interface DealEndEventObject {
+  hsId: BigNumber;
+  player: string;
+  playerIdx: BigNumber;
+}
+export type DealEndEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  DealEndEventObject
+>;
+
+export type DealEndEventFilter = TypedEventFilter<DealEndEvent>;
 
 export interface EndGameEventObject {
   hsId: BigNumber;
@@ -328,6 +350,7 @@ export interface HearthStone extends BaseContract {
     dealCardsToPlayer(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -340,12 +363,14 @@ export interface HearthStone extends BaseContract {
 
     moveToChooseStage(
       hsId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     moveToShuffleStage(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -386,6 +411,7 @@ export interface HearthStone extends BaseContract {
   dealCardsToPlayer(
     hsId: PromiseOrValue<BigNumberish>,
     shuffleId: PromiseOrValue<BigNumberish>,
+    playerIdx: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -398,12 +424,14 @@ export interface HearthStone extends BaseContract {
 
   moveToChooseStage(
     hsId: PromiseOrValue<BigNumberish>,
+    playerIdx: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   moveToShuffleStage(
     hsId: PromiseOrValue<BigNumberish>,
     shuffleId: PromiseOrValue<BigNumberish>,
+    playerIdx: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -444,6 +472,7 @@ export interface HearthStone extends BaseContract {
     dealCardsToPlayer(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -456,12 +485,14 @@ export interface HearthStone extends BaseContract {
 
     moveToChooseStage(
       hsId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     moveToShuffleStage(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -499,6 +530,17 @@ export interface HearthStone extends BaseContract {
       shuffleId?: null,
       creator?: null
     ): CreateGameEventFilter;
+
+    "DealEnd(uint256,address,uint256)"(
+      hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
+      playerIdx?: null
+    ): DealEndEventFilter;
+    DealEnd(
+      hsId?: PromiseOrValue<BigNumberish> | null,
+      player?: null,
+      playerIdx?: null
+    ): DealEndEventFilter;
 
     "EndGame(uint256,address,uint256)"(
       hsId?: PromiseOrValue<BigNumberish> | null,
@@ -577,6 +619,7 @@ export interface HearthStone extends BaseContract {
     dealCardsToPlayer(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -589,12 +632,14 @@ export interface HearthStone extends BaseContract {
 
     moveToChooseStage(
       hsId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     moveToShuffleStage(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -636,6 +681,7 @@ export interface HearthStone extends BaseContract {
     dealCardsToPlayer(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -648,12 +694,14 @@ export interface HearthStone extends BaseContract {
 
     moveToChooseStage(
       hsId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     moveToShuffleStage(
       hsId: PromiseOrValue<BigNumberish>,
       shuffleId: PromiseOrValue<BigNumberish>,
+      playerIdx: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

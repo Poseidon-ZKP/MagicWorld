@@ -9,18 +9,15 @@ import { arbitrumGoerli } from 'wagmi/chains';
 
 import StatusItem from '../components/StatusItem';
 import { useWrites } from '../hooks/useWrites';
-import useGame, { IGameStatus } from '../hooks/useGame';
+import useGame, { IGameStatus, Turn } from '../hooks/useGame';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import Button from '../components/Button';
 
 import noAvatar from '../assets/images/noAvatar.png';
 import mockUser1 from '../assets/images/mockUser1.jpg';
 import mockUser2 from '../assets/images/mockUser2.jpg';
-import tank from '../assets/images/tank.jpeg';
-import warrior from '../assets/images/warrior.jpeg';
-import wizard from '../assets/images/wizard.jpeg';
 
-import Card, { list } from '../components/Card';
+import Card, { cardConfig, list } from '../components/Card';
 
 import styles from '../styles/Home.module.css';
 
@@ -34,15 +31,7 @@ export default function Home() {
 
   const { chain } = useNetwork();
   const { address } = useAccount();
-  const {
-    createGameStatus,
-    joinGameStatus,
-    // creatorShuffleJoinStatus,
-    // joinerShuffleJoinStatus,
-    creatorShuffleShuffleStatus,
-    joinerShuffleShuffleStatus,
-    batchDrawStatus,
-  } = useWrites();
+
   const { zkShuffle } = useContext(ZKShuffleContext);
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
@@ -54,6 +43,14 @@ export default function Home() {
     joinerList,
     joinerShuffleId,
     gameStatus,
+    createGameStatus,
+    joinGameStatus,
+
+    creatorShuffleShuffleStatus,
+    joinerShuffleShuffleStatus,
+    batchDrawStatus,
+    openStatus,
+    chooseCardStatus,
   } = useGame(creator, joiner, address);
   const [selectCreatorCard, setSelectCreatorCard] = useState<number>();
   const [selectJoinerCard, setSelectJoinerCard] = useState<number>();
@@ -68,6 +65,9 @@ export default function Home() {
 
   const isCreator = address === creator;
   const batchShuffleId = isCreator ? joinerShuffleId : creatorShuffleId;
+  const openShuffleId = isCreator ? creatorShuffleId : joinerShuffleId;
+  const userSelectCardIndex = isCreator ? selectCreatorCard : selectJoinerCard;
+  const playIdx = isCreator ? Turn.Creator : Turn.Joiner;
   // if (!creator || !joiner) {
   //   return (
   //     <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
@@ -119,8 +119,6 @@ export default function Home() {
     );
   }
 
-  console.log('gameStatus', gameStatus);
-
   return (
     <div>
       <div
@@ -148,27 +146,22 @@ export default function Home() {
             </div>
           </div>
           <div className="w-[96rem]  flex flex-1  flex-row gap-2 overflow-x-auto ">
-            <Card
-              cardValue={{
-                img: wizard.src,
-                attack: 5,
-                defense: 2,
-              }}
-              isFlipped
-            />
             {creatorList.map((item) => {
               return (
                 <Card
-                  cardValue={{
-                    img: wizard.src,
-                    attack: 5,
-                    defense: 2,
-                  }}
+                  isDisabled={!isCreator || gameStatus !== IGameStatus.DRAWED}
+                  cardValue={cardConfig?.[item?.cardValue]}
                   isFlipped={item.isFlipped}
                   key={item.index}
-                  // isLoading={true}
-                  // isChoose
+                  isChoose={item.isChoose}
+                  isLoading={
+                    isCreator &&
+                    chooseCardStatus.isLoading &&
+                    item.index === selectCreatorCard
+                  }
                   onClickFrond={() => {
+                    console.log('playIdx', playIdx);
+                    chooseCardStatus.run(hsId, Turn.Creator, item.index);
                     setSelectCreatorCard(item.index);
                   }}
                 />
@@ -242,49 +235,44 @@ export default function Home() {
               </Button>
             </>
           )}
-
-          {/* <Button
-            isError={creatorShuffleShuffleStatus.isError}
-            isSuccess={creatorShuffleShuffleStatus.isSuccess}
-            isLoading={creatorShuffleShuffleStatus.isLoading}
-            onClick={async () => {
-              const res = await zkShuffle.generate_shuffle_proof(5);
-              console.log('res', res);
-              // zkShuffle?.joinGame(creatorShuffleId);
-              // debugger;
-              // creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
-            }}
-          >
-            test
-          </Button> */}
-
-          {/* {gameStatus === IGameStatus.CREATOR_SHUFFLE_JOINED && (
+          {isCreator && gameStatus === IGameStatus.CREATOR_CHOOSED && (
             <Button
-              isError={joinerShuffleJoinStatus.isError}
-              isSuccess={joinerShuffleJoinStatus.isSuccess}
-              isLoading={joinerShuffleJoinStatus.isLoading}
-              onClick={() => {
-                // zkShuffle?.joinGame(creatorShuffleId);
-                joinerShuffleJoinStatus.mutateAsync(joinerShuffleId);
+              isError={openStatus.isError}
+              isSuccess={openStatus.isSuccess}
+              isLoading={openStatus.isLoading}
+              onClick={async () => {
+                try {
+                  openStatus.mutateAsync({
+                    shuffleId: openShuffleId,
+                    cardIds: [userSelectCardIndex],
+                  });
+                } catch (error) {
+                  console.log('error', error);
+                }
               }}
             >
-              Joiner shuffle join
+              open
             </Button>
           )}
-
-          {gameStatus === IGameStatus.JOINER_SHUFFLE_JOINED && (
+          {!isCreator && gameStatus === IGameStatus.JOINER_CHOOSED && (
             <Button
-              isError={creatorShuffleShuffleStatus.isError}
-              isSuccess={creatorShuffleShuffleStatus.isSuccess}
-              isLoading={creatorShuffleShuffleStatus.isLoading}
-              onClick={() => {
-                // zkShuffle?.joinGame(creatorShuffleId);
-                creatorShuffleShuffleStatus.mutateAsync(creatorShuffleId);
+              isError={openStatus.isError}
+              isSuccess={openStatus.isSuccess}
+              isLoading={openStatus.isLoading}
+              onClick={async () => {
+                try {
+                  openStatus.mutateAsync({
+                    shuffleId: openShuffleId,
+                    cardIds: [userSelectCardIndex],
+                  });
+                } catch (error) {
+                  console.log('error', error);
+                }
               }}
             >
-              Creator shuffle shuffle
+              open
             </Button>
-          )} */}
+          )}
 
           {gameStatus === IGameStatus.CREATOR_SHUFFLE_SHUFFLED && (
             <Button
@@ -307,25 +295,27 @@ export default function Home() {
             {joinerList.map((item) => {
               return (
                 <Card
-                  cardValue={wizard.src}
+                  isDisabled={
+                    isCreator || gameStatus !== IGameStatus.CREATOR_OPENED
+                  }
+                  cardValue={cardConfig?.[item?.cardValue]}
                   isFlipped={item.isFlipped}
                   key={item.index}
+                  isChoose={item.isChoose}
+                  isLoading={
+                    !isCreator &&
+                    chooseCardStatus.isLoading &&
+                    item.index === selectJoinerCard
+                  }
+                  onClickFrond={() => {
+                    chooseCardStatus.run(hsId, Turn.Joiner, item.index);
+                    setSelectJoinerCard(item.index);
+                  }}
                 />
               );
             })}
-            {/* <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={wizard.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={tank.src} isFlipped />
-            <Card cardValue={warrior.src} isFlipped />
-            <Card cardValue={warrior.src} isFlipped /> */}
           </div>
 
-          {/* <Image src={noAvatar.src} width={120} height={120} alt="" /> */}
           <div className="flex flex-row gap-5 items-center">
             <Image
               src={mockUser2.src}
