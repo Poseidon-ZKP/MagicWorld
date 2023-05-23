@@ -169,7 +169,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{"jacob.ens"}
+                address:{"jacob.eth"}
               </div>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{"click.ens"}
+                address:{"click.eth"}
               </div>
             </div>
           </div>
