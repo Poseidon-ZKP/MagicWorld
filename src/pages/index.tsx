@@ -186,7 +186,10 @@ export default function Home() {
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
           {winner ? (
             <div className="text-3xl font-medium text-gray-200 shrink-0 ml-2 mr-2">
-              {winner?.[2] === Turn.Creator ? 'jacob.eth ' : 'click.eth'} won!
+              {winner?.[2]?.toString() == Turn.Creator
+                ? 'jacob.eth '
+                : 'click.eth'}{' '}
+              won!
             </div>
           ) : (
             <div className="flex flex-row gap-4 ml-2 mr-2 shrink-0">

@@ -8,6 +8,7 @@ import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
 import { initList, list } from '../components/Card';
 import { useWrites } from './useWrites';
+import { AnyAaaaRecord } from 'dns';
 
 // export interface UseGame {
 //   creator: string;
@@ -58,7 +59,7 @@ function useGame(creator: string, joiner: string, address: string) {
 
   const [creatorList, setCreatorList] = useState(cloneDeep(list));
   const [joinerList, setJoinerList] = useState(cloneDeep(list));
-  const [winner, setWinner] = useState();
+  const [winner, setWinner] = useState<AnyAaaaRecord>();
   const { zkShuffle } = useContext(ZKShuffleContext);
 
   const {
