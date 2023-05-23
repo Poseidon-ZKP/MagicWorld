@@ -38,7 +38,7 @@ export enum Turn {
 //   Joiner,
 // }
 
-export const BLOCK_INTERVAL = 150;
+export const BLOCK_INTERVAL = 400;
 
 function useGame(creator: string, joiner: string, address: string) {
   const { hs } = useContracts();
@@ -345,6 +345,7 @@ function useGame(creator: string, joiner: string, address: string) {
         const startBlock = (await provider.getBlockNumber()) - BLOCK_INTERVAL;
 
         const res = await zkShuffle.checkTurn(creatorShuffleId, startBlock);
+        console.log('first deck checkTurn', res);
         if (res !== GameTurn.NOP) {
           setCreatorShuffleStatus(res);
         }
@@ -357,7 +358,7 @@ function useGame(creator: string, joiner: string, address: string) {
       setInterval(async () => {
         const startBlock = (await provider.getBlockNumber()) - BLOCK_INTERVAL;
         const res = await zkShuffle.checkTurn(joinerShuffleId, startBlock);
-
+        console.log('second deck checkTurn', res);
         if (res !== GameTurn.NOP) {
           setJoinerShuffleStatus(res);
         }
