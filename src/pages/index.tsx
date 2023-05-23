@@ -120,14 +120,6 @@ export default function Home() {
     );
   }
 
-  if (winner) {
-    return (
-      <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
-        <div className="text-2xl font-medium">winner is {winner}</div>
-      </div>
-    );
-  }
-  console.log('gameStatus', gameStatus);
   return (
     <div>
       <div
@@ -167,7 +159,9 @@ export default function Home() {
             {creatorList.map((item) => {
               return (
                 <Card
-                  isDisabled={!isCreator || gameStatus !== IGameStatus.DRAWED}
+                  isDisabled={
+                    !isCreator || gameStatus !== IGameStatus.DRAWED || winner
+                  }
                   cardValue={cardConfig?.[item?.cardValue]}
                   isFlipped={item.isFlipped}
                   key={item.index}
@@ -190,196 +184,203 @@ export default function Home() {
 
         <div className="mt-3 mb-3 flex flex-row w-full  items-center">
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
-          <div className="flex flex-row gap-4 ml-2 mr-2 shrink-0">
-            {isCreator && gameStatus === IGameStatus.WAIT_START && (
-              <Button
-                isError={createGameStatus.isError}
-                isSuccess={createGameStatus.isSuccess}
-                isLoading={createGameStatus.isLoading}
-                onClick={() => {
-                  createGameStatus.run(zkShuffle.pk[0], zkShuffle.pk[1]);
-                }}
-              >
-                Create
-              </Button>
-            )}
-
-            {!isCreator && gameStatus === IGameStatus.CREATED && (
-              <Button
-                isError={joinGameStatus.isError}
-                isSuccess={joinGameStatus.isSuccess}
-                isLoading={joinGameStatus.isLoading}
-                onClick={() => {
-                  joinGameStatus.run(hsId, zkShuffle.pk[0], zkShuffle.pk[1]);
-                }}
-              >
-                Join
-              </Button>
-            )}
-
-            {gameStatus === IGameStatus.JOINED && isCreator && (
-              <>
+          {winner ? (
+            <div className="text-3xl font-medium text-gray-200 shrink-0 ml-2 mr-2">
+              {winner?.[2] === Turn.Creator ? 'jacob.eth ' : 'click.eth'} won!
+            </div>
+          ) : (
+            <div className="flex flex-row gap-4 ml-2 mr-2 shrink-0">
+              {isCreator && gameStatus === IGameStatus.WAIT_START && (
                 <Button
-                  isDisabled={!creatorButtonStatus.creatorCreatorToShuffle}
-                  isError={creatorShuffleShuffleStatus.isError}
-                  isSuccess={creatorShuffleShuffleStatus.isSuccess}
-                  isLoading={creatorShuffleShuffleStatus.isLoading}
+                  isError={createGameStatus.isError}
+                  isSuccess={createGameStatus.isSuccess}
+                  isLoading={createGameStatus.isLoading}
                   onClick={() => {
+                    createGameStatus.run(zkShuffle.pk[0], zkShuffle.pk[1]);
+                  }}
+                >
+                  Create
+                </Button>
+              )}
+
+              {!isCreator && gameStatus === IGameStatus.CREATED && (
+                <Button
+                  isError={joinGameStatus.isError}
+                  isSuccess={joinGameStatus.isSuccess}
+                  isLoading={joinGameStatus.isLoading}
+                  onClick={() => {
+                    joinGameStatus.run(hsId, zkShuffle.pk[0], zkShuffle.pk[1]);
+                  }}
+                >
+                  Join
+                </Button>
+              )}
+
+              {gameStatus === IGameStatus.JOINED && isCreator && (
+                <>
+                  <Button
+                    isDisabled={!creatorButtonStatus.creatorCreatorToShuffle}
+                    isError={creatorShuffleShuffleStatus.isError}
+                    isSuccess={creatorShuffleShuffleStatus.isSuccess}
+                    isLoading={creatorShuffleShuffleStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        creatorShuffleShuffleStatus.mutateAsync(
+                          Number(creatorShuffleId)
+                        );
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Shuffle the first deck
+                  </Button>
+                  <Button
+                    isDisabled={!creatorButtonStatus.creatorJoinerToShuffle}
+                    isError={joinerShuffleShuffleStatus.isError}
+                    isSuccess={joinerShuffleShuffleStatus.isSuccess}
+                    isLoading={joinerShuffleShuffleStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        // zkShuffle?.joinGame(creatorShuffleId);
+                        joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Shuffle the second deck
+                  </Button>
+                  <Button
+                    isDisabled={!creatorButtonStatus.creatorToDraw}
+                    isError={batchDrawStatus.isError}
+                    isSuccess={batchDrawStatus.isSuccess}
+                    isLoading={batchDrawStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        // zkShuffle?.joinGame(creatorShuffleId);
+                        batchDrawStatus.mutateAsync(batchShuffleId);
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Batch draw
+                  </Button>
+                </>
+              )}
+
+              {gameStatus === IGameStatus.JOINED && !isCreator && (
+                <>
+                  <Button
+                    isDisabled={!joinerButtonStatus.joinerCreatorToShuffle}
+                    isError={creatorShuffleShuffleStatus.isError}
+                    isSuccess={creatorShuffleShuffleStatus.isSuccess}
+                    isLoading={creatorShuffleShuffleStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        creatorShuffleShuffleStatus.mutateAsync(
+                          Number(creatorShuffleId)
+                        );
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Shuffle the first deck
+                  </Button>
+                  <Button
+                    isDisabled={!joinerButtonStatus.joinerJoinerToShuffle}
+                    isError={joinerShuffleShuffleStatus.isError}
+                    isSuccess={joinerShuffleShuffleStatus.isSuccess}
+                    isLoading={joinerShuffleShuffleStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        // zkShuffle?.joinGame(creatorShuffleId);
+                        joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Shuffle the second deck
+                  </Button>
+                  <Button
+                    isDisabled={!joinerButtonStatus.joinerToDraw}
+                    isError={batchDrawStatus.isError}
+                    isSuccess={batchDrawStatus.isSuccess}
+                    isLoading={batchDrawStatus.isLoading}
+                    onClick={() => {
+                      try {
+                        // zkShuffle?.joinGame(creatorShuffleId);
+                        batchDrawStatus.mutateAsync(batchShuffleId);
+                      } catch (error) {
+                        console.log('error', error);
+                      }
+                    }}
+                  >
+                    Batch draw
+                  </Button>
+                </>
+              )}
+              {isCreator && gameStatus === IGameStatus.CREATOR_CHOOSED && (
+                <Button
+                  isError={openStatus.isError}
+                  isSuccess={openStatus.isSuccess}
+                  isLoading={openStatus.isLoading}
+                  onClick={async () => {
                     try {
-                      creatorShuffleShuffleStatus.mutateAsync(
-                        Number(creatorShuffleId)
-                      );
+                      openStatus.mutateAsync({
+                        shuffleId: openShuffleId,
+                        cardIds: [userSelectCardIndex],
+                      });
                     } catch (error) {
                       console.log('error', error);
                     }
                   }}
                 >
-                  Shuffle the first deck
+                  open
                 </Button>
+              )}
+              {!isCreator && gameStatus === IGameStatus.JOINER_CHOOSED && (
                 <Button
-                  isDisabled={!creatorButtonStatus.creatorJoinerToShuffle}
+                  isError={openStatus.isError}
+                  isSuccess={openStatus.isSuccess}
+                  isLoading={openStatus.isLoading}
+                  onClick={async () => {
+                    try {
+                      openStatus.mutateAsync({
+                        shuffleId: openShuffleId,
+                        cardIds: [userSelectCardIndex],
+                      });
+                    } catch (error) {
+                      console.log('error', error);
+                    }
+                  }}
+                >
+                  open
+                </Button>
+              )}
+
+              {gameStatus === IGameStatus.CREATOR_SHUFFLE_SHUFFLED && (
+                <Button
                   isError={joinerShuffleShuffleStatus.isError}
                   isSuccess={joinerShuffleShuffleStatus.isSuccess}
                   isLoading={joinerShuffleShuffleStatus.isLoading}
                   onClick={() => {
                     try {
-                      // zkShuffle?.joinGame(creatorShuffleId);
                       joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                     } catch (error) {
                       console.log('error', error);
                     }
                   }}
                 >
-                  Shuffle the second deck
+                  Joiner shuffle shuffle
                 </Button>
-                <Button
-                  isDisabled={!creatorButtonStatus.creatorToDraw}
-                  isError={batchDrawStatus.isError}
-                  isSuccess={batchDrawStatus.isSuccess}
-                  isLoading={batchDrawStatus.isLoading}
-                  onClick={() => {
-                    try {
-                      // zkShuffle?.joinGame(creatorShuffleId);
-                      batchDrawStatus.mutateAsync(batchShuffleId);
-                    } catch (error) {
-                      console.log('error', error);
-                    }
-                  }}
-                >
-                  Batch draw
-                </Button>
-              </>
-            )}
+              )}
+            </div>
+          )}
 
-            {gameStatus === IGameStatus.JOINED && !isCreator && (
-              <>
-                <Button
-                  isDisabled={!joinerButtonStatus.joinerCreatorToShuffle}
-                  isError={creatorShuffleShuffleStatus.isError}
-                  isSuccess={creatorShuffleShuffleStatus.isSuccess}
-                  isLoading={creatorShuffleShuffleStatus.isLoading}
-                  onClick={() => {
-                    try {
-                      creatorShuffleShuffleStatus.mutateAsync(
-                        Number(creatorShuffleId)
-                      );
-                    } catch (error) {
-                      console.log('error', error);
-                    }
-                  }}
-                >
-                  Shuffle the first deck
-                </Button>
-                <Button
-                  isDisabled={!joinerButtonStatus.joinerJoinerToShuffle}
-                  isError={joinerShuffleShuffleStatus.isError}
-                  isSuccess={joinerShuffleShuffleStatus.isSuccess}
-                  isLoading={joinerShuffleShuffleStatus.isLoading}
-                  onClick={() => {
-                    try {
-                      // zkShuffle?.joinGame(creatorShuffleId);
-                      joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
-                    } catch (error) {
-                      console.log('error', error);
-                    }
-                  }}
-                >
-                  Shuffle the second deck
-                </Button>
-                <Button
-                  isDisabled={!joinerButtonStatus.joinerToDraw}
-                  isError={batchDrawStatus.isError}
-                  isSuccess={batchDrawStatus.isSuccess}
-                  isLoading={batchDrawStatus.isLoading}
-                  onClick={() => {
-                    try {
-                      // zkShuffle?.joinGame(creatorShuffleId);
-                      batchDrawStatus.mutateAsync(batchShuffleId);
-                    } catch (error) {
-                      console.log('error', error);
-                    }
-                  }}
-                >
-                  Batch draw
-                </Button>
-              </>
-            )}
-            {isCreator && gameStatus === IGameStatus.CREATOR_CHOOSED && (
-              <Button
-                isError={openStatus.isError}
-                isSuccess={openStatus.isSuccess}
-                isLoading={openStatus.isLoading}
-                onClick={async () => {
-                  try {
-                    openStatus.mutateAsync({
-                      shuffleId: openShuffleId,
-                      cardIds: [userSelectCardIndex],
-                    });
-                  } catch (error) {
-                    console.log('error', error);
-                  }
-                }}
-              >
-                open
-              </Button>
-            )}
-            {!isCreator && gameStatus === IGameStatus.JOINER_CHOOSED && (
-              <Button
-                isError={openStatus.isError}
-                isSuccess={openStatus.isSuccess}
-                isLoading={openStatus.isLoading}
-                onClick={async () => {
-                  try {
-                    openStatus.mutateAsync({
-                      shuffleId: openShuffleId,
-                      cardIds: [userSelectCardIndex],
-                    });
-                  } catch (error) {
-                    console.log('error', error);
-                  }
-                }}
-              >
-                open
-              </Button>
-            )}
-
-            {gameStatus === IGameStatus.CREATOR_SHUFFLE_SHUFFLED && (
-              <Button
-                isError={joinerShuffleShuffleStatus.isError}
-                isSuccess={joinerShuffleShuffleStatus.isSuccess}
-                isLoading={joinerShuffleShuffleStatus.isLoading}
-                onClick={() => {
-                  try {
-                    joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
-                  } catch (error) {
-                    console.log('error', error);
-                  }
-                }}
-              >
-                Joiner shuffle shuffle
-              </Button>
-            )}
-          </div>
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
         </div>
 
@@ -389,7 +390,9 @@ export default function Home() {
               return (
                 <Card
                   isDisabled={
-                    isCreator || gameStatus !== IGameStatus.CREATOR_OPENED
+                    isCreator ||
+                    gameStatus !== IGameStatus.CREATOR_OPENED ||
+                    winner
                   }
                   cardValue={cardConfig?.[item?.cardValue]}
                   isFlipped={item.isFlipped}

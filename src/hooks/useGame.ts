@@ -326,10 +326,10 @@ function useGame(creator: string, joiner: string, address: string) {
 
   useEffect(() => {
     if (endGameListener.creator) {
-      setWinner(endGameListener.creator[1]);
+      setWinner(endGameListener.creator);
     }
     if (endGameListener.joiner) {
-      setWinner(endGameListener.joiner[1]);
+      setWinner(endGameListener.joiner);
     }
     return () => {};
   }, [endGameListener]);
