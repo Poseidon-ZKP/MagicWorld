@@ -6,10 +6,11 @@ import { useContracts } from '../hooks/useContracts';
 import { useSigner } from 'wagmi';
 import { set, get, clear } from 'idb-keyval';
 
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 
 export interface IZKShuffleContext {
   zkShuffle: ZKShuffle;
+  isLoaded: boolean;
 }
 
 export const ZKShuffleContext = createContext<IZKShuffleContext>(null);
@@ -19,6 +20,9 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
   const { data: signer } = useSigner();
 
   const [zkShuffle, setZkShuffle] = useState<ZKShuffle>();
+
+  const isLoaded = !!zkShuffle;
+
   const cacheCryptoFiles = async (
     files: UnwrapPromise<ReturnType<typeof dnld_crypto_files>>
   ) => {
@@ -92,6 +96,7 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
     <ZKShuffleContext.Provider
       value={{
         zkShuffle,
+        isLoaded,
       }}
     >
       {children}

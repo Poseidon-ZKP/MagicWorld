@@ -1,11 +1,9 @@
-import react, { ButtonHTMLAttributes } from 'react';
-import Image from 'next/image';
-import loading from '../../assets/icons/loading.svg';
 export interface IButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   isError?: boolean;
   isSuccess?: boolean;
+  isDisabled?: boolean;
 }
 
 function Button({
@@ -13,6 +11,7 @@ function Button({
   isSuccess = false,
   isLoading = false,
   isError = false,
+  isDisabled,
   ...otherProps
 }: IButtonProps) {
   if (isSuccess) {
@@ -46,12 +45,10 @@ function Button({
 
   return (
     <button
-      className={`flex justify-center items-center  text-white    py-1 px-2 rounded-md ${
-        isError
-          ? 'border-[#e23636]  bg-[#e23636]'
-          : 'border-slate-200  bg-sky-500'
-      }`}
-      disabled={isLoading}
+      className={`flex justify-center items-center  text-white  py-1 px-2 rounded-md border-slate-200  bg-sky-500 ${
+        isError && 'border-[#e23636]  bg-[#e23636]'
+      } ${isDisabled && 'border-[#242222]  bg-[#242222]'}`}
+      disabled={isLoading || isDisabled}
       {...otherProps}
     >
       {isLoading && (

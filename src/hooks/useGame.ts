@@ -1,13 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { useContracts } from './useContracts';
+import { UnwrapPromise } from '../contexts/ZKShuffle';
 import useEvent, { PULL_DATA_TIME } from './useEvent';
-import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
-import { config } from '../config';
+import { useProvider } from 'wagmi';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
-import { shuffle } from '@poseidon-zkp/poseidon-zk-proof/dist/src/shuffle/proof';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
-import { cardConfig, list } from '../components/Card';
+import { list } from '../components/Card';
 import { useWrites } from './useWrites';
 // export interface UseGame {
 //   creator: string;
@@ -52,17 +51,17 @@ function useGame(creator: string, joiner: string, address: string) {
   const [joinerShuffleStatus, setJoinerShuffleStatus] = useState<GameTurn>(
     GameTurn.NOP
   );
+  const [gameInfo, setGameInfo] =
+    useState<UnwrapPromise<ReturnType<typeof hs.getGameInfo>>>();
 
   const [creatorList, setCreatorList] = useState(cloneDeep(list));
   const [joinerList, setJoinerList] = useState(cloneDeep(list));
-
+  const [winner, setWinner] = useState();
   const { zkShuffle } = useContext(ZKShuffleContext);
 
   const {
     createGameStatus,
     joinGameStatus,
-    // creatorShuffleJoinStatus,
-    // joinerShuffleJoinStatus,
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
     batchDrawStatus,
@@ -89,6 +88,19 @@ function useGame(creator: string, joiner: string, address: string) {
     isStop: gameStatus !== IGameStatus.CREATED,
     // isStop: true,
     addressIndex: 2,
+    others: {
+      creator: creator,
+      joiner: joiner,
+      // gameId,
+    },
+  });
+
+  const nextPlayerListener = useEvent({
+    contract: hs,
+    filter: hs?.filters?.NextPlayer(null, null, null),
+    isStop: gameStatus !== IGameStatus.JOINED,
+    // isStop: true,
+    addressIndex: 1,
     others: {
       creator: creator,
       joiner: joiner,
@@ -139,41 +151,39 @@ function useGame(creator: string, joiner: string, address: string) {
     },
   });
 
-  // const joinGameListener = useEvent({
-  //   contract: hs,
-  //   filter: hs?.filters?.JoinGame(null, null, null),
-  //   isStop: gameStatus !== IGameStatus.CREATED,
-  //   addressIndex: 2,
-  //   others: {
-  //     creator: creator,
-  //     joiner: joiner,
-  //     // gameId,
-  //   },
-  // });
+  const endGameListener = useEvent({
+    contract: hs,
+    filter: hs?.filters?.EndGame(null, null, null),
+    isStop:
+      gameStatus !== IGameStatus.CREATOR_OPENED &&
+      gameStatus !== IGameStatus.CREATOR_CHOOSED &&
+      gameStatus !== IGameStatus.JOINER_CHOOSED &&
+      gameStatus !== IGameStatus.JOINER_OPENED &&
+      gameStatus !== IGameStatus.DRAWED,
+    // isStop: true,
+    addressIndex: 1,
+    others: {
+      creator: creator,
+      joiner: joiner,
+      // gameId,
+    },
+  });
 
   const hsId = createGameListener?.creator?.[0]?.toString();
   const creatorShuffleId = createGameListener?.creator?.[1]?.toString();
   const joinerShuffleId = joinGameListener?.joiner?.[1]?.toString();
 
   const joinerButtonStatus = useMemo(() => {
-    const creatorCreatorToShuffle =
-      creatorShuffleStatus === GameTurn.NOP &&
-      joinerShuffleStatus === GameTurn.Shuffle;
     const joinerCreatorToShuffle =
       creatorShuffleStatus === GameTurn.Shuffle &&
       joinerShuffleStatus === GameTurn.Shuffle;
     const joinerJoinerToShuffle =
       creatorShuffleStatus === GameTurn.Deal &&
       joinerShuffleStatus === GameTurn.Shuffle;
-    const creatorJoinerToShuffle =
-      creatorShuffleStatus === GameTurn.Deal &&
-      joinerShuffleStatus === GameTurn.Shuffle;
 
     return {
-      creatorCreatorToShuffle,
       joinerCreatorToShuffle,
       joinerJoinerToShuffle,
-      creatorJoinerToShuffle,
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
@@ -181,20 +191,17 @@ function useGame(creator: string, joiner: string, address: string) {
     const creatorCreatorToShuffle =
       creatorShuffleStatus === GameTurn.Shuffle &&
       joinerShuffleStatus === GameTurn.NOP;
-    const joinerCreatorToShuffle =
-      creatorShuffleStatus === GameTurn.Shuffle &&
-      joinerShuffleStatus === GameTurn.NOP;
-    const joinerJoinerToShuffle =
-      creatorShuffleStatus === GameTurn.Shuffle &&
-      joinerShuffleStatus === GameTurn.NOP;
+
     const creatorJoinerToShuffle =
       creatorShuffleStatus === GameTurn.Shuffle &&
       joinerShuffleStatus === GameTurn.Shuffle;
+    const creatorToDraw =
+      creatorShuffleStatus === GameTurn.Shuffle &&
+      joinerShuffleStatus === GameTurn.Deal;
     return {
       creatorCreatorToShuffle,
-      joinerCreatorToShuffle,
-      joinerJoinerToShuffle,
       creatorJoinerToShuffle,
+      creatorToDraw,
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
@@ -203,6 +210,16 @@ function useGame(creator: string, joiner: string, address: string) {
   //     const chooseCard = await hs?.chooseCard(hsId, 0, index);
   //   } catch (error) {}
   // };
+
+  const getGameInfo = async () => {
+    try {
+      const res = await hs?.getGameInfo(hsId);
+      console.log('getGameInfo', res);
+      setGameInfo(res);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   useEffect(() => {
     if (createGameListener?.creator) {
@@ -219,6 +236,7 @@ function useGame(creator: string, joiner: string, address: string) {
   useEffect(() => {
     if (dealEndListener?.creator && dealEndListener?.joiner) {
       setGameStatus(IGameStatus.DRAWED);
+      getGameInfo();
     }
   }, [dealEndListener?.creator, dealEndListener?.joiner]);
 
@@ -241,6 +259,10 @@ function useGame(creator: string, joiner: string, address: string) {
   }, [chooseCardGameListener?.joiner]);
 
   useEffect(() => {
+    return () => {};
+  }, [nextPlayerListener?.creator, nextPlayerListener?.joiner]);
+
+  useEffect(() => {
     if (chooseCardGameListener?.creator && chooseCardGameListener?.joiner) {
       chooseCardGameListener.reset();
     }
@@ -252,6 +274,7 @@ function useGame(creator: string, joiner: string, address: string) {
       const cardValue = openCardListener?.creator?.[4]?.toString();
       creatorList[cardIndex].cardValue = Math.floor(cardValue / 10);
       creatorList[cardIndex].isFlipped = true;
+      getGameInfo();
       setGameStatus(IGameStatus.CREATOR_OPENED);
       setCreatorList([...creatorList]);
     }
@@ -263,6 +286,7 @@ function useGame(creator: string, joiner: string, address: string) {
       const cardValue = openCardListener?.joiner?.[4]?.toString();
       joinerList[cardIndex].cardValue = Math.floor(cardValue / 10);
       joinerList[cardIndex].isFlipped = true;
+      getGameInfo();
       setGameStatus(IGameStatus.JOINER_OPENED);
       setJoinerList([...joinerList]);
     }
@@ -275,6 +299,16 @@ function useGame(creator: string, joiner: string, address: string) {
       setGameStatus(IGameStatus.DRAWED);
     }
   }, [openCardListener?.creator, openCardListener?.joiner]);
+
+  useEffect(() => {
+    if (endGameListener.creator) {
+      setWinner(endGameListener.creator[1]);
+    }
+    if (endGameListener.joiner) {
+      setWinner(endGameListener.joiner[1]);
+    }
+    return () => {};
+  }, [endGameListener]);
 
   // get game status
   useEffect(() => {
@@ -306,34 +340,6 @@ function useGame(creator: string, joiner: string, address: string) {
     }
   }, [joinerShuffleId]);
 
-  useEffect(() => {
-    // if (
-    //   creatorShuffleStatus === GameTurn.Shuffle &&
-    //   joinerShuffleStatus === GameTurn.NOP
-    // ) {
-    //   setGameStatus(IGameStatus.CREATOR_SHUFFLE_JOINED);
-    // }
-    // if (
-    //   creatorShuffleStatus === GameTurn.Shuffle &&
-    //   joinerShuffleStatus === GameTurn.Shuffle
-    // ) {
-    //   setGameStatus(IGameStatus.JOINER_SHUFFLE_JOINED);
-    // }
-    // if (
-    //   creatorShuffleStatus === GameTurn.Deal &&
-    //   joinerShuffleStatus === GameTurn.Shuffle
-    // ) {
-    //   setGameStatus(IGameStatus.CREATOR_SHUFFLE_SHUFFLED);
-    // }
-    // if (
-    //   creatorShuffleStatus === GameTurn.Deal &&
-    //   joinerShuffleStatus === GameTurn.Deal
-    // ) {
-    //   setGameStatus(IGameStatus.JOINER_SHUFFLE_SHUFFLED);
-    // }
-  }, [joinerShuffleStatus, creatorShuffleStatus]);
-
-  console.log('gameStatus', gameStatus);
   return {
     hsId,
     creatorShuffleId,
@@ -342,14 +348,17 @@ function useGame(creator: string, joiner: string, address: string) {
     createGameListener,
     creatorList,
     joinerList,
+    creatorButtonStatus,
+    joinerButtonStatus,
     createGameStatus,
     joinGameStatus,
-
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
     batchDrawStatus,
     openStatus,
     chooseCardStatus,
+    gameInfo,
+    winner,
   };
 }
 

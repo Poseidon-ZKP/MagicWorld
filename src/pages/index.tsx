@@ -32,10 +32,11 @@ export default function Home() {
   const { chain } = useNetwork();
   const { address } = useAccount();
 
-  const { zkShuffle } = useContext(ZKShuffleContext);
+  const { zkShuffle, isLoaded } = useContext(ZKShuffleContext);
   const { switchNetwork } = useSwitchNetwork({
     chainId: arbitrumGoerli.id,
   });
+
   const {
     hsId,
     creatorShuffleId,
@@ -45,12 +46,15 @@ export default function Home() {
     gameStatus,
     createGameStatus,
     joinGameStatus,
-
+    creatorButtonStatus,
+    joinerButtonStatus,
     creatorShuffleShuffleStatus,
     joinerShuffleShuffleStatus,
     batchDrawStatus,
     openStatus,
     chooseCardStatus,
+    gameInfo,
+    winner,
   } = useGame(creator, joiner, address);
   const [selectCreatorCard, setSelectCreatorCard] = useState<number>();
   const [selectJoinerCard, setSelectJoinerCard] = useState<number>();
@@ -119,6 +123,21 @@ export default function Home() {
     );
   }
 
+  if (!isLoaded) {
+    return (
+      <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
+        <div className="text-2xl font-medium">Loading zk resource ....</div>
+      </div>
+    );
+  }
+
+  if (winner) {
+    return (
+      <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
+        <div className="text-2xl font-medium">winner is {winner}</div>
+      </div>
+    );
+  }
   return (
     <div>
       <div
@@ -136,10 +155,19 @@ export default function Home() {
               alt=""
               className="rounded-full"
             />
+
             <div>
-              <div className="text-gray-400 text-2xl font-mono font-bold">
-                HP:100
-              </div>
+              {gameInfo && (
+                <>
+                  <div className="text-gray-400 text-2xl font-mono font-bold">
+                    HP:{gameInfo?.health[0]?.toString()}
+                  </div>
+
+                  <div className="text-gray-400 text-2xl font-mono font-bold">
+                    shield:{gameInfo?.shield[0]?.toString()}
+                  </div>
+                </>
+              )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
                 address:{formatAddress(joiner)}
               </div>
@@ -169,6 +197,7 @@ export default function Home() {
             })}
           </div>
         </div>
+
         <div className="m-1 flex flex-row w-full gap-4 items-center">
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
           {isCreator && gameStatus === IGameStatus.WAIT_START && (
@@ -197,9 +226,10 @@ export default function Home() {
             </Button>
           )}
 
-          {gameStatus === IGameStatus.JOINED && (
+          {gameStatus === IGameStatus.JOINED && isCreator && (
             <>
               <Button
+                isDisabled={!creatorButtonStatus.creatorCreatorToShuffle}
                 isError={creatorShuffleShuffleStatus.isError}
                 isSuccess={creatorShuffleShuffleStatus.isSuccess}
                 isLoading={creatorShuffleShuffleStatus.isLoading}
@@ -212,6 +242,49 @@ export default function Home() {
                 Creator shuffle shuffle
               </Button>
               <Button
+                isDisabled={!creatorButtonStatus.creatorJoinerToShuffle}
+                isError={joinerShuffleShuffleStatus.isError}
+                isSuccess={joinerShuffleShuffleStatus.isSuccess}
+                isLoading={joinerShuffleShuffleStatus.isLoading}
+                onClick={() => {
+                  // zkShuffle?.joinGame(creatorShuffleId);
+                  joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                }}
+              >
+                Joiner shuffle shuffle
+              </Button>
+              <Button
+                isDisabled={!creatorButtonStatus.creatorToDraw}
+                isError={batchDrawStatus.isError}
+                isSuccess={batchDrawStatus.isSuccess}
+                isLoading={batchDrawStatus.isLoading}
+                onClick={() => {
+                  // zkShuffle?.joinGame(creatorShuffleId);
+                  batchDrawStatus.mutateAsync(batchShuffleId);
+                }}
+              >
+                Batch draw
+              </Button>
+            </>
+          )}
+
+          {gameStatus === IGameStatus.JOINED && !isCreator && (
+            <>
+              <Button
+                isDisabled={!joinerButtonStatus.joinerCreatorToShuffle}
+                isError={creatorShuffleShuffleStatus.isError}
+                isSuccess={creatorShuffleShuffleStatus.isSuccess}
+                isLoading={creatorShuffleShuffleStatus.isLoading}
+                onClick={() => {
+                  creatorShuffleShuffleStatus.mutateAsync(
+                    Number(creatorShuffleId)
+                  );
+                }}
+              >
+                Creator shuffle shuffle
+              </Button>
+              <Button
+                isDisabled={!joinerButtonStatus.joinerJoinerToShuffle}
                 isError={joinerShuffleShuffleStatus.isError}
                 isSuccess={joinerShuffleShuffleStatus.isSuccess}
                 isLoading={joinerShuffleShuffleStatus.isLoading}
@@ -290,6 +363,7 @@ export default function Home() {
 
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
         </div>
+
         <div className="flex w-full flex-col items-center justify-center gap-5">
           <div className="w-[96rem] flex flex-1  flex-row gap-2 overflow-x-auto ">
             {joinerList.map((item) => {
@@ -324,10 +398,19 @@ export default function Home() {
               alt=""
               className="rounded-full"
             />
+
             <div>
-              <div className="text-gray-400 text-2xl font-mono font-bold">
-                HP:100
-              </div>
+              {gameInfo && (
+                <>
+                  <div className="text-gray-400 text-2xl font-mono font-bold">
+                    HP:{gameInfo?.health[1]?.toString()}
+                  </div>
+
+                  <div className="text-gray-400 text-2xl font-mono font-bold">
+                    shield:{gameInfo?.shield[1]?.toString()}
+                  </div>
+                </>
+              )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
                 address:{formatAddress(joiner)}
               </div>
