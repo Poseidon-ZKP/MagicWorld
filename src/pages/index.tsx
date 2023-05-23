@@ -169,7 +169,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{formatAddress(joiner)}
+                address:{formatAddress(creator)}
               </div>
             </div>
           </div>
