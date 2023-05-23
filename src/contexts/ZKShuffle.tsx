@@ -11,6 +11,7 @@ export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 export interface IZKShuffleContext {
   zkShuffle: ZKShuffle;
   isLoaded: boolean;
+  clearCache: () => void;
 }
 
 export const ZKShuffleContext = createContext<IZKShuffleContext>(null);
@@ -50,6 +51,10 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
 
   const cacheSk = (sk: string) => {
     set('sk', sk);
+  };
+
+  const clearCache = () => {
+    clear();
   };
 
   // useEffect(() => {
@@ -97,6 +102,7 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
       value={{
         zkShuffle,
         isLoaded,
+        clearCache,
       }}
     >
       {children}
