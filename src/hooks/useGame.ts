@@ -8,7 +8,7 @@ import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
 import { initList, list } from '../components/Card';
 import { useWrites } from './useWrites';
-import { sleep } from '../utils/shuffle/utility';
+
 // export interface UseGame {
 //   creator: string;
 //   joiner: string;
@@ -38,7 +38,7 @@ export enum Turn {
 //   Joiner,
 // }
 
-export const BLOCK_INTERVAL = 400;
+export const BLOCK_INTERVAL = 150;
 
 function useGame(creator: string, joiner: string, address: string) {
   const { hs } = useContracts();
@@ -215,6 +215,8 @@ function useGame(creator: string, joiner: string, address: string) {
   //     const chooseCard = await hs?.chooseCard(hsId, 0, index);
   //   } catch (error) {}
   // };
+
+  console.log('creatorButtonStatus', creatorButtonStatus);
 
   const getGameInfo = async () => {
     try {
