@@ -180,10 +180,11 @@ function useGame(creator: string, joiner: string, address: string) {
     const joinerJoinerToShuffle =
       creatorShuffleStatus === GameTurn.Deal &&
       joinerShuffleStatus === GameTurn.Shuffle;
-
+    const joinerToDraw = creatorShuffleStatus === GameTurn.Deal;
     return {
       joinerCreatorToShuffle,
       joinerJoinerToShuffle,
+      joinerToDraw,
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 

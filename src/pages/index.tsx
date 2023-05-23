@@ -239,7 +239,7 @@ export default function Home() {
                   );
                 }}
               >
-                Creator shuffle shuffle
+                Shuffle the first deck
               </Button>
               <Button
                 isDisabled={!creatorButtonStatus.creatorJoinerToShuffle}
@@ -251,7 +251,7 @@ export default function Home() {
                   joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                 }}
               >
-                Joiner shuffle shuffle
+                Shuffle the second deck
               </Button>
               <Button
                 isDisabled={!creatorButtonStatus.creatorToDraw}
@@ -281,7 +281,7 @@ export default function Home() {
                   );
                 }}
               >
-                Creator shuffle shuffle
+                Shuffle the first deck
               </Button>
               <Button
                 isDisabled={!joinerButtonStatus.joinerJoinerToShuffle}
@@ -293,9 +293,10 @@ export default function Home() {
                   joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                 }}
               >
-                Joiner shuffle shuffle
+                Shuffle the second deck
               </Button>
               <Button
+                isDisabled={!joinerButtonStatus.joinerToDraw}
                 isError={batchDrawStatus.isError}
                 isSuccess={batchDrawStatus.isSuccess}
                 isLoading={batchDrawStatus.isLoading}
