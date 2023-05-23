@@ -71,17 +71,6 @@ export default function Home() {
   const openShuffleId = isCreator ? creatorShuffleId : joinerShuffleId;
   const batchShuffleId = isCreator ? joinerShuffleId : creatorShuffleId;
   const userSelectCardIndex = isCreator ? selectCreatorCard : selectJoinerCard;
-  const playIdx = isCreator ? Turn.Creator : Turn.Joiner;
-  // if (!creator || !joiner) {
-  //   return (
-  //     <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
-  //       <div className="text-2xl font-medium">no creator or joiner</div>
-  //       <div className="text-2xl font-medium text-pink-500">
-  //         Please add them on URL
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   if (!address) {
     return (
@@ -236,9 +225,13 @@ export default function Home() {
                   isSuccess={creatorShuffleShuffleStatus.isSuccess}
                   isLoading={creatorShuffleShuffleStatus.isLoading}
                   onClick={() => {
-                    creatorShuffleShuffleStatus.mutateAsync(
-                      Number(creatorShuffleId)
-                    );
+                    try {
+                      creatorShuffleShuffleStatus.mutateAsync(
+                        Number(creatorShuffleId)
+                      );
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Shuffle the first deck
@@ -249,8 +242,12 @@ export default function Home() {
                   isSuccess={joinerShuffleShuffleStatus.isSuccess}
                   isLoading={joinerShuffleShuffleStatus.isLoading}
                   onClick={() => {
-                    // zkShuffle?.joinGame(creatorShuffleId);
-                    joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                    try {
+                      // zkShuffle?.joinGame(creatorShuffleId);
+                      joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Shuffle the second deck
@@ -261,8 +258,12 @@ export default function Home() {
                   isSuccess={batchDrawStatus.isSuccess}
                   isLoading={batchDrawStatus.isLoading}
                   onClick={() => {
-                    // zkShuffle?.joinGame(creatorShuffleId);
-                    batchDrawStatus.mutateAsync(batchShuffleId);
+                    try {
+                      // zkShuffle?.joinGame(creatorShuffleId);
+                      batchDrawStatus.mutateAsync(batchShuffleId);
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Batch draw
@@ -278,9 +279,13 @@ export default function Home() {
                   isSuccess={creatorShuffleShuffleStatus.isSuccess}
                   isLoading={creatorShuffleShuffleStatus.isLoading}
                   onClick={() => {
-                    creatorShuffleShuffleStatus.mutateAsync(
-                      Number(creatorShuffleId)
-                    );
+                    try {
+                      creatorShuffleShuffleStatus.mutateAsync(
+                        Number(creatorShuffleId)
+                      );
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Shuffle the first deck
@@ -291,8 +296,12 @@ export default function Home() {
                   isSuccess={joinerShuffleShuffleStatus.isSuccess}
                   isLoading={joinerShuffleShuffleStatus.isLoading}
                   onClick={() => {
-                    // zkShuffle?.joinGame(creatorShuffleId);
-                    joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                    try {
+                      // zkShuffle?.joinGame(creatorShuffleId);
+                      joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Shuffle the second deck
@@ -303,8 +312,12 @@ export default function Home() {
                   isSuccess={batchDrawStatus.isSuccess}
                   isLoading={batchDrawStatus.isLoading}
                   onClick={() => {
-                    // zkShuffle?.joinGame(creatorShuffleId);
-                    batchDrawStatus.mutateAsync(batchShuffleId);
+                    try {
+                      // zkShuffle?.joinGame(creatorShuffleId);
+                      batchDrawStatus.mutateAsync(batchShuffleId);
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 >
                   Batch draw
@@ -356,8 +369,11 @@ export default function Home() {
                 isSuccess={joinerShuffleShuffleStatus.isSuccess}
                 isLoading={joinerShuffleShuffleStatus.isLoading}
                 onClick={() => {
-                  // zkShuffle?.joinGame(creatorShuffleId);
-                  joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                  try {
+                    joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
+                  } catch (error) {
+                    console.log('error', error);
+                  }
                 }}
               >
                 Joiner shuffle shuffle
@@ -385,8 +401,12 @@ export default function Home() {
                     item.index === selectJoinerCard
                   }
                   onClickBack={() => {
-                    chooseCardStatus.run(hsId, Turn.Joiner, item.index);
-                    setSelectJoinerCard(item.index);
+                    try {
+                      chooseCardStatus.run(hsId, Turn.Joiner, item.index);
+                      setSelectJoinerCard(item.index);
+                    } catch (error) {
+                      console.log('error', error);
+                    }
                   }}
                 />
               );
