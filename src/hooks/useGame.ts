@@ -10,11 +10,6 @@ import { initList, list } from '../components/Card';
 import { useWrites } from './useWrites';
 import { AnyAaaaRecord } from 'dns';
 
-// export interface UseGame {
-//   creator: string;
-//   joiner: string;
-// }
-
 export enum IGameStatus {
   WAIT_START,
   CREATED,
@@ -33,11 +28,6 @@ export enum Turn {
   Creator,
   Joiner,
 }
-
-// export enum PlayerIndex {
-//   Creator,
-//   Joiner,
-// }
 
 export const BLOCK_INTERVAL = 150;
 
@@ -206,14 +196,6 @@ function useGame(creator: string, joiner: string, address: string) {
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
-  // const handleOpenCard = async (index: number) => {
-  //   try {
-  //     const chooseCard = await hs?.chooseCard(hsId, 0, index);
-  //   } catch (error) {}
-  // };
-
-  console.log('creatorButtonStatus', creatorButtonStatus);
-
   const getGameInfo = async () => {
     try {
       const res = await hs?.getGameInfo(hsId);
@@ -363,6 +345,24 @@ function useGame(creator: string, joiner: string, address: string) {
       }, PULL_DATA_TIME);
     }
   }, [joinerShuffleId]);
+
+  useEffect(() => {
+    let timer = null;
+    if (
+      gameStatus === IGameStatus.DRAWED ||
+      gameStatus === IGameStatus.CREATOR_CHOOSED ||
+      gameStatus === IGameStatus.CREATOR_OPENED ||
+      gameStatus === IGameStatus.JOINER_CHOOSED ||
+      gameStatus === IGameStatus.JOINER_OPENED
+    ) {
+      timer = setInterval(() => {
+        getGameInfo();
+      }, PULL_DATA_TIME);
+    }
+    return () => {
+      timer && clearInterval(timer);
+    };
+  }, [gameStatus]);
 
   return {
     hsId,
