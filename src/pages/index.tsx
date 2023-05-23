@@ -170,7 +170,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{formatAddress(creator)}
+                address:{'jacob.eth'}
               </div>
             </div>
           </div>
@@ -415,7 +415,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{formatAddress(joiner)}
+                address:{'click.eth'}
               </div>
             </div>
           </div>
