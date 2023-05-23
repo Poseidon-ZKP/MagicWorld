@@ -219,8 +219,7 @@ function useGame(creator: string, joiner: string, address: string) {
   const getGameInfo = async () => {
     try {
       const res = await hs?.getGameInfo(hsId);
-      console.log('getGameInfo', res);
-      setGameInfo(cloneDeep(res));
+      setGameInfo(res);
     } catch (error) {
       console.log('error', error);
     }

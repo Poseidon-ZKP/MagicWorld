@@ -161,11 +161,11 @@ export default function Home() {
               {gameInfo && (
                 <>
                   <div className="text-gray-400 text-2xl font-mono font-bold">
-                    HP:{gameInfo?.health[0]?.toString()}
+                    HP:{gameInfo?.health?.[0]?.toString()}
                   </div>
 
                   <div className="text-gray-400 text-2xl font-mono font-bold">
-                    shield:{gameInfo?.shield[0]?.toString()}
+                    shield:{gameInfo?.shield?.[0]?.toString()}
                   </div>
                 </>
               )}
@@ -406,11 +406,11 @@ export default function Home() {
               {gameInfo && (
                 <>
                   <div className="text-gray-400 text-2xl font-mono font-bold">
-                    HP:{gameInfo?.health[1]?.toString()}
+                    HP:{gameInfo?.health?.[1]?.toString()}
                   </div>
 
                   <div className="text-gray-400 text-2xl font-mono font-bold">
-                    shield:{gameInfo?.shield[1]?.toString()}
+                    shield:{gameInfo?.shield?.[1]?.toString()}
                   </div>
                 </>
               )}
