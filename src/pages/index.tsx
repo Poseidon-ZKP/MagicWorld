@@ -138,7 +138,7 @@ export default function Home() {
       </div>
     );
   }
-
+  console.log('gameStatus', gameStatus);
   return (
     <div>
       <div

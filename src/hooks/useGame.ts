@@ -220,7 +220,7 @@ function useGame(creator: string, joiner: string, address: string) {
     try {
       const res = await hs?.getGameInfo(hsId);
       console.log('getGameInfo', res);
-      setGameInfo(res);
+      setGameInfo(cloneDeep(res));
     } catch (error) {
       console.log('error', error);
     }
@@ -315,16 +315,16 @@ function useGame(creator: string, joiner: string, address: string) {
       joinerList[cardIndex].cardValue = Math.floor(cardValue / 10);
       joinerList[cardIndex].isFlipped = true;
       getGameInfo();
-      setGameStatus(IGameStatus.JOINER_OPENED);
+      setGameStatus(IGameStatus.DRAWED);
       setJoinerList([...joinerList]);
     }
   }, [openCardListener?.joiner]);
 
   useEffect(() => {
     if (openCardListener?.creator && openCardListener?.joiner) {
+      setGameStatus(IGameStatus.DRAWED);
       openCardListener.reset();
       openStatus.reset();
-      setGameStatus(IGameStatus.DRAWED);
     }
   }, [openCardListener?.creator, openCardListener?.joiner]);
 
