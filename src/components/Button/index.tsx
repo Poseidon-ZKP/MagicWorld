@@ -17,10 +17,10 @@ function Button({
   if (isSuccess) {
     return (
       <button
-        className={`flex justify-center items-center bg-sky-500 text-white   py-1 px-2 rounded-md ${
+        className={`flex justify-center shrink-0 items-center bg-amber-800 text-white  py-1 px-2 rounded-md ${
           isError
-            ? 'border-[#e23636]  bg-[#e23636]'
-            : 'border-slate-200  bg-sky-500'
+            ? '!border-[#e23636]  !bg-[#e23636]'
+            : '!border-slate-200 !bg-amber-800'
         }`}
         disabled
         {...otherProps}
@@ -45,9 +45,9 @@ function Button({
 
   return (
     <button
-      className={`flex justify-center items-center  text-white  py-1 px-2 rounded-md border-slate-200  bg-sky-500 ${
-        isError && 'border-[#e23636]  bg-[#e23636]'
-      } ${isDisabled && 'border-[#242222]  bg-[#242222]'}`}
+      className={`flex shrink-0 justify-center items-center  text-white  py-1 px-2 rounded-md border-slate-200  bg-amber-800 ${
+        isError ? '!border-rose-700  !bg-rose-700' : ''
+      } ${isDisabled ? '!border-slate-700  !bg-slate-700' : ''}`}
       disabled={isLoading || isDisabled}
       {...otherProps}
     >

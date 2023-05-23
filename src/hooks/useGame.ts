@@ -6,8 +6,9 @@ import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useProvider } from 'wagmi';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
-import { list } from '../components/Card';
+import { initList, list } from '../components/Card';
 import { useWrites } from './useWrites';
+import { sleep } from '../utils/shuffle/utility';
 // export interface UseGame {
 //   creator: string;
 //   joiner: string;
@@ -51,6 +52,7 @@ function useGame(creator: string, joiner: string, address: string) {
   const [joinerShuffleStatus, setJoinerShuffleStatus] = useState<GameTurn>(
     GameTurn.NOP
   );
+
   const [gameInfo, setGameInfo] =
     useState<UnwrapPromise<ReturnType<typeof hs.getGameInfo>>>();
 
@@ -172,6 +174,8 @@ function useGame(creator: string, joiner: string, address: string) {
   const hsId = createGameListener?.creator?.[0]?.toString();
   const creatorShuffleId = createGameListener?.creator?.[1]?.toString();
   const joinerShuffleId = joinGameListener?.joiner?.[1]?.toString();
+  const isCreator = address === creator;
+  const openShuffleId = isCreator ? creatorShuffleId : joinerShuffleId;
 
   const joinerButtonStatus = useMemo(() => {
     const joinerCreatorToShuffle =
@@ -234,10 +238,33 @@ function useGame(creator: string, joiner: string, address: string) {
     }
   }, [joinGameListener?.joiner]);
 
+  const getUserCards = async () => {
+    let userCards = [];
+    do {
+      userCards = await zkShuffle.openOffchain(
+        openShuffleId,
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      );
+    } while (userCards.includes(-1));
+    return userCards;
+  };
+
   useEffect(() => {
+    const handleGetInfos = async () => {
+      try {
+        await getGameInfo();
+        const userCards = await getUserCards();
+
+        isCreator
+          ? setCreatorList(initList(userCards, true))
+          : setJoinerList(initList(userCards, true));
+        setGameStatus(IGameStatus.DRAWED);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     if (dealEndListener?.creator && dealEndListener?.joiner) {
-      setGameStatus(IGameStatus.DRAWED);
-      getGameInfo();
+      handleGetInfos();
     }
   }, [dealEndListener?.creator, dealEndListener?.joiner]);
 
@@ -320,7 +347,6 @@ function useGame(creator: string, joiner: string, address: string) {
 
         const res = await zkShuffle.checkTurn(creatorShuffleId, startBlock);
         if (res !== GameTurn.NOP) {
-          console.log('creator checkTurn', res, creatorShuffleId, startBlock);
           setCreatorShuffleStatus(res);
         }
       }, PULL_DATA_TIME);
@@ -334,7 +360,6 @@ function useGame(creator: string, joiner: string, address: string) {
         const res = await zkShuffle.checkTurn(joinerShuffleId, startBlock);
 
         if (res !== GameTurn.NOP) {
-          console.log('joiner checkTurn', res, joinerShuffleId, startBlock);
           setJoinerShuffleStatus(res);
         }
       }, PULL_DATA_TIME);
