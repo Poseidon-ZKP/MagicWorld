@@ -1,15 +1,13 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
 
-import ReactCardFlip, { ReactFlipCardProps } from 'react-card-flip';
+import ReactCardFlip, { ReactFlipCardProps } from "react-card-flip";
 
-import tank from '../../assets/images/tank.jpeg';
-import warrior from '../../assets/images/warrior.jpeg';
-import wizard from '../../assets/images/wizard.jpeg';
+import { tank, warrior, wizard } from "../../config/asset";
 
-import styles from './style.module.css';
+import styles from "./style.module.css";
 
-export interface CardProps extends Omit<ReactFlipCardProps, 'children'> {
+export interface CardProps extends Omit<ReactFlipCardProps, "children"> {
   cardValue?: {
     img: string;
     attack: number;
@@ -32,17 +30,17 @@ export const cardConfig = {
   [ICardType.Wizard]: {
     attack: 16,
     defense: 5,
-    img: wizard.src,
+    img: wizard,
   },
   [ICardType.Warrior]: {
     attack: 11,
     defense: 10,
-    img: warrior.src,
+    img: warrior,
   },
   [ICardType.Tank]: {
     attack: 3,
     defense: 18,
-    img: tank.src,
+    img: tank,
   },
 };
 
@@ -66,7 +64,7 @@ function Index({
   isLoading,
   isChoose,
   isError = false,
-  flipDirection = 'horizontal',
+  flipDirection = "horizontal",
   onClickFrond,
   onClickBack,
   ...cardProps
@@ -84,13 +82,13 @@ function Index({
         className={`flex items-center justify-center w-[14rem] h-[14rem]  rounded-md   shadow-lg    ${
           isDisabled
             ? isChoose
-              ? 'opacity-100'
-              : 'opacity-50'
-            : 'hover:cursor-pointer hover:shadow-slate-700/70  hover:opacity-75'
+              ? "opacity-100"
+              : "opacity-50"
+            : "hover:cursor-pointer hover:shadow-slate-700/70  hover:opacity-75"
         } ${
           isError
-            ? 'bg-red-500'
-            : 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-700'
+            ? "bg-red-500"
+            : "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-700"
         }  `}
       >
         {isChoose && (
@@ -140,9 +138,9 @@ function Index({
         }  ${
           isDisabled
             ? isChoose
-              ? 'opacity-100'
-              : 'opacity-70'
-            : 'hover:cursor-pointer hover:shadow-slate-700/70  hover:opacity-75'
+              ? "opacity-100"
+              : "opacity-70"
+            : "hover:cursor-pointer hover:shadow-slate-700/70  hover:opacity-75"
         } 
           `}
       >
@@ -187,11 +185,11 @@ function Index({
 
         <div
           className={
-            'absolute flex flex-col w-full h-full justify-center items-center'
+            "absolute flex flex-col w-full h-full justify-center items-center"
           }
         >
-          <div className="text-xl">attack:{cardValue?.attack || '--'}</div>
-          <div className="text-xl">defense:{cardValue?.defense || '--'}</div>
+          <div className="text-xl">attack:{cardValue?.attack || "--"}</div>
+          <div className="text-xl">defense:{cardValue?.defense || "--"}</div>
         </div>
 
         <img
