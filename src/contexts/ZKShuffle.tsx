@@ -67,7 +67,7 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
         const data = await getCryptoFilesFromCache();
         let res = null;
         if (!data) {
-          res = await dnld_crypto_files(30);
+          res = await dnld_crypto_files(52);
           if (res) {
             await cacheCryptoFiles(res);
           } else {

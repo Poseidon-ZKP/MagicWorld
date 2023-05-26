@@ -147,6 +147,7 @@ export class ZKShuffle implements IZKShuffle {
 
   async joinGame(gameId: number): Promise<number> {
     const address = await this.owner.getAddress();
+    debugger;
     await (
       await this.smc.playerRegister(gameId, address, this.pk[0], this.pk[1])
     ).wait();
@@ -160,7 +161,6 @@ export class ZKShuffle implements IZKShuffle {
   }
 
   async checkTurn(gameId: number, startBlock: any = 0): Promise<GameTurn> {
-    debugger;
     if (startBlock == undefined || startBlock == 0) {
       startBlock = this.nextBlockPerGame.get(gameId);
       if (startBlock == undefined) {

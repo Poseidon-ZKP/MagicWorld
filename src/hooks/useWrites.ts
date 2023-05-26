@@ -6,38 +6,24 @@ import { useContext } from 'react';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 
 export const useWrites = () => {
-  const { hs } = useContracts();
+  const { hilo } = useContracts();
   const { zkShuffle } = useContext(ZKShuffleContext);
-  const createGameStatus = useWriteContract(hs?.createShuffleForCreator, {});
-  const joinGameStatus = useWriteContract(hs?.createShuffleForJoiner, {});
-  const chooseCardStatus = useWriteContract(hs?.chooseCard, {});
-
-  const creatorShuffleJoinStatus = useMutation({
-    mutationFn: (shuffleId: number) => {
-      return zkShuffle?.joinGame(shuffleId);
-    },
-  });
-  const joinerShuffleJoinStatus = useMutation({
+  const createGameStatus = useWriteContract(hilo?.createGame, {});
+  const joinGameStatus = useMutation({
     mutationFn: (shuffleId: number) => {
       return zkShuffle?.joinGame(shuffleId);
     },
   });
 
-  const creatorShuffleShuffleStatus = useMutation({
+  const shuffleStatus = useMutation({
     mutationFn: (gameId: number) => {
       return zkShuffle?.shuffle(gameId);
     },
   });
 
-  const joinerShuffleShuffleStatus = useMutation({
+  const drawStatus = useMutation({
     mutationFn: (gameId: number) => {
-      return zkShuffle?.shuffle(gameId);
-    },
-  });
-
-  const batchDrawStatus = useMutation({
-    mutationFn: (gameId: number) => {
-      return zkShuffle?.batchDraw(gameId);
+      return zkShuffle?.draw(gameId);
     },
   });
 
@@ -56,12 +42,8 @@ export const useWrites = () => {
   return {
     createGameStatus,
     joinGameStatus,
-    creatorShuffleJoinStatus,
-    joinerShuffleJoinStatus,
-    creatorShuffleShuffleStatus,
-    joinerShuffleShuffleStatus,
-    batchDrawStatus,
+    shuffleStatus,
+    drawStatus,
     openStatus,
-    chooseCardStatus,
   };
 };
