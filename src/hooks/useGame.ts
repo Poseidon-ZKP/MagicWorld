@@ -5,7 +5,6 @@ import { useProvider } from 'wagmi';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
 import { useWrites } from './useWrites';
-import { AnyAaaaRecord } from 'dns';
 
 export enum IGameStatus {
   WAIT_START,
@@ -33,7 +32,7 @@ function useGame(creator: string, joiner: string, address: string) {
     GameTurn.NOP
   );
 
-  const [winner, setWinner] = useState<AnyAaaaRecord>();
+  const [winner, setWinner] = useState<any>();
   const { zkShuffle } = useContext(ZKShuffleContext);
 
   const {
@@ -123,6 +122,7 @@ function useGame(creator: string, joiner: string, address: string) {
     }
   }, [shuffleId]);
 
+  console.log('creatorShuffleStatus', creatorShuffleStatus);
   // useEffect(() => {
   //   if (creatorShuffleStatus) {
   //     if (creatorShuffleStatus === GameTurn.Shuffle) {

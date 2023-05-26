@@ -170,11 +170,31 @@ export class ZKShuffle implements IZKShuffle {
 
     let filter = this.smc.filters.PlayerTurn(null, null, null);
     let events = await this.smc.queryFilter(filter, startBlock);
+    console.log('events', events);
     for (let i = 0; i < events.length; i++) {
       const e = events[i];
       startBlock = e.blockNumber + 1; // TODO : probably missing event in same block
       const playerId = await this.getPlayerId(gameId);
-
+      console.log(
+        '🚀 ~ file: zkShuffle.ts:184 ~ ZKShuffle ~ checkTurn ~ ',
+        e,
+        'e?.args?.gameId.toNumber()',
+        e?.args?.gameId.toNumber(),
+        'e?.args?.gameId.toNumber()',
+        e?.args?.playerIndex.toNumber()
+      );
+      console.log(
+        '🚀 ~ file: zkShuffle.ts:184 ~ ZKShuffle ~ checkTurn ~ ',
+        'gameId',
+        gameId
+      );
+      console.log(
+        '🚀 ~ file: zkShuffle.ts:184 ~ ZKShuffle ~ checkTurn ~ ',
+        'playerId',
+        playerId
+      );
+      console.log(e?.args?.gameId.toNumber() != gameId);
+      console.log(e?.args?.playerIndex.toNumber() != playerId);
       if (
         e?.args?.gameId.toNumber() != gameId ||
         e?.args?.playerIndex.toNumber() != playerId
