@@ -2,18 +2,15 @@ import React, { useContext } from 'react';
 import Button from '../components/Button';
 import { ZKShuffleContext } from '../contexts/ZKShuffle';
 
-function Index() {
+function Test() {
   const { clearCache } = useContext(ZKShuffleContext);
   return (
     <Button
       onClick={() => {
         clearCache();
       }}
-    >
-      {' '}
-      clear zk shuffle files{' '}
-    </Button>
+    ></Button>
   );
 }
 
-export default Index;
+export default Test;
