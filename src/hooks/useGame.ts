@@ -1,14 +1,13 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
-import { useContracts } from './useContracts';
-import { UnwrapPromise } from '../contexts/ZKShuffle';
-import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { useProvider } from 'wagmi';
-import { ZKShuffleContext } from '../contexts/ZKShuffle';
+
+import { useContracts } from './useContracts';
+import { UnwrapPromise, ZKShuffleContext } from '../contexts/ZKShuffle';
+import useEvent, { PULL_DATA_TIME } from './useEvent';
 import { GameTurn } from '../utils/shuffle/zkShuffle';
 import { initList, list } from '../components/Card';
 import { useWrites } from './useWrites';
-import { AnyAaaaRecord } from 'dns';
 
 export enum IGameStatus {
   WAIT_START,
@@ -49,7 +48,7 @@ function useGame(creator: string, joiner: string, address: string) {
 
   const [creatorList, setCreatorList] = useState(cloneDeep(list));
   const [joinerList, setJoinerList] = useState(cloneDeep(list));
-  const [winner, setWinner] = useState<AnyAaaaRecord>();
+  const [winner, setWinner] = useState<string>();
   const { zkShuffle } = useContext(ZKShuffleContext);
 
   const {
@@ -105,12 +104,10 @@ function useGame(creator: string, joiner: string, address: string) {
     contract: hs,
     filter: hs?.filters?.DealEnd(null, null, null),
     isStop: gameStatus !== IGameStatus.JOINED,
-    // isStop: true,
     addressIndex: 1,
     others: {
       creator: creator,
       joiner: joiner,
-      // gameId,
     },
   });
 
@@ -120,12 +117,10 @@ function useGame(creator: string, joiner: string, address: string) {
     isStop:
       gameStatus !== IGameStatus.DRAWED &&
       gameStatus !== IGameStatus.CREATOR_OPENED,
-    // isStop: true,
     addressIndex: 1,
     others: {
       creator: creator,
       joiner: joiner,
-      // gameId,
     },
   });
 
@@ -135,12 +130,10 @@ function useGame(creator: string, joiner: string, address: string) {
     isStop:
       gameStatus !== IGameStatus.CREATOR_CHOOSED &&
       gameStatus !== IGameStatus.JOINER_CHOOSED,
-    // isStop: true,
     addressIndex: 1,
     others: {
       creator: creator,
       joiner: joiner,
-      // gameId,
     },
   });
 
@@ -153,12 +146,10 @@ function useGame(creator: string, joiner: string, address: string) {
       gameStatus !== IGameStatus.JOINER_CHOOSED &&
       gameStatus !== IGameStatus.JOINER_OPENED &&
       gameStatus !== IGameStatus.DRAWED,
-    // isStop: true,
     addressIndex: 1,
     others: {
       creator: creator,
       joiner: joiner,
-      // gameId,
     },
   });
 
