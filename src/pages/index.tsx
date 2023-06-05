@@ -1,24 +1,15 @@
-import { useAccount, useConnect, useNetwork, useSwitchNetwork } from "wagmi";
+import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
+import React, { useContext, useState } from 'react';
+import { useRouter } from 'next/router';
+import { arbitrumGoerli } from 'wagmi/chains';
 
-import React, { useContext, useState } from "react";
-import Image from "next/image";
-import { formatAddress } from "../utils/common";
+import useGame, { IGameStatus, Turn } from '../hooks/useGame';
+import { ZKShuffleContext } from '../contexts/ZKShuffle';
+import Button from '../components/Button';
+import Card, { cardConfig } from '../components/Card';
+import { mockUser1, mockUser2 } from '../config/asset';
 
-import { useRouter } from "next/router";
-import { arbitrumGoerli } from "wagmi/chains";
-
-import StatusItem from "../components/StatusItem";
-import { useWrites } from "../hooks/useWrites";
-import useGame, { IGameStatus, Turn } from "../hooks/useGame";
-import { ZKShuffleContext } from "../contexts/ZKShuffle";
-import Button from "../components/Button";
-
-import noAvatar from "../assets/images/noAvatar.png";
-import { mockUser1, mockUser2 } from "../config/asset";
-
-import Card, { cardConfig, list } from "../components/Card";
-
-import styles from "../styles/Home.module.css";
+import styles from '../styles/Home.module.css';
 
 export default function Home() {
   const { connect, connectors } = useConnect();
@@ -150,7 +141,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{"jacob.eth"}
+                address:{'jacob.eth'}
               </div>
             </div>
           </div>
@@ -186,8 +177,8 @@ export default function Home() {
           {winner ? (
             <div className="text-3xl font-medium text-gray-200 shrink-0 ml-2 mr-2">
               {winner?.[2]?.toString() == Turn.Creator
-                ? "jacob.eth"
-                : "click.eth"}{" "}
+                ? 'jacob.eth'
+                : 'click.eth'}{' '}
               won!
             </div>
           ) : (
@@ -231,7 +222,7 @@ export default function Home() {
                           Number(creatorShuffleId)
                         );
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -247,7 +238,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -263,7 +254,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         batchDrawStatus.mutateAsync(batchShuffleId);
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -285,7 +276,7 @@ export default function Home() {
                           Number(creatorShuffleId)
                         );
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -301,7 +292,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -317,7 +308,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         batchDrawStatus.mutateAsync(batchShuffleId);
                       } catch (error) {
-                        console.log("error", error);
+                        console.log('error', error);
                       }
                     }}
                   >
@@ -337,7 +328,7 @@ export default function Home() {
                         cardIds: [userSelectCardIndex],
                       });
                     } catch (error) {
-                      console.log("error", error);
+                      console.log('error', error);
                     }
                   }}
                 >
@@ -356,7 +347,7 @@ export default function Home() {
                         cardIds: [userSelectCardIndex],
                       });
                     } catch (error) {
-                      console.log("error", error);
+                      console.log('error', error);
                     }
                   }}
                 >
@@ -373,7 +364,7 @@ export default function Home() {
                     try {
                       joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                     } catch (error) {
-                      console.log("error", error);
+                      console.log('error', error);
                     }
                   }}
                 >
@@ -410,7 +401,7 @@ export default function Home() {
                       chooseCardStatus.run(hsId, Turn.Joiner, item.index);
                       setSelectJoinerCard(item.index);
                     } catch (error) {
-                      console.log("error", error);
+                      console.log('error', error);
                     }
                   }}
                 />
@@ -440,7 +431,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{"click.eth"}
+                address:{'click.eth'}
               </div>
             </div>
           </div>
