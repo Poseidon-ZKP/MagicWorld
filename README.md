@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Illustrate
 
-This branch is from `proposal` branch
+This branch is from `magic-world` branch
 
 ## Getting Started
 
