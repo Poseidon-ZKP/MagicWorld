@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useEffect, useState } from 'react';
 // import useSigner from '../hooks/useSigner';
-import { ZKShuffle } from '../utils/shuffle/zkShuffle';
+import { ZKShuffle } from '@poseidon-zkp/poseidon-zk-jssdk';
+// import { ZKShuffle } from '../utils/shuffle/zkShuffle';
 import { dnld_crypto_files } from '../utils/shuffle/utility';
 import { useContracts } from '../hooks/useContracts';
 import { useSigner } from 'wagmi';
@@ -89,6 +90,13 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
       console.log('error', error);
     }
   };
+
+  useEffect(() => {
+    if (!signer) return;
+    getCacheData(30);
+
+    return () => {};
+  }, [signer]);
 
   return (
     <ZKShuffleContext.Provider
