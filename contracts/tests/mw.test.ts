@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { ZKShuffle } from "@poseidon-zkp/poseidon-zk-jssdk";
 import { IShuffleStateManager } from "../types/@poseidon-zkp/poseidon-zk-contracts/contracts/shuffle/IShuffleStateManager";
-import { deploy_shuffle_manager } from "@poseidon-zkp/poseidon-zk-contracts/helper/deploy";
+import { deploy_shuffle_manager } from "@poseidon-zkp/poseidon-zk-contracts/dist/helper/deploy";
 import { MagicWorld } from "../types/artifacts/cache/solpp-generated-contracts";
 import { MagicWorld__factory } from "../types/factories/artifacts/cache/solpp-generated-contracts/MagicWorld__factory";
 import { P0X_DIR } from "@poseidon-zkp/poseidon-zk-jssdk";
@@ -17,28 +17,29 @@ async function fullprocess() {
     shuffle_manager_owner
   );
 
-  const hs: MagicWorld = await new MagicWorld__factory(ks_owner).deploy(
+  const mw: MagicWorld = await new MagicWorld__factory(ks_owner).deploy(
     shuffle.address
   );
   console.log(
-    `deployed shuffleManager at ${shuffle.address}, hs at ${hs.address}`
+    `deployed shuffleManager at ${shuffle.address}, mw at ${mw.address}`
   );
 
   // init shuffle context, which packages the ShuffleManager contract
-  const cardConfig = await hs.cardConfig();
-  let encrypt_wasm: string;
-  let encrypt_zkey: string;
+  const cardConfig = await mw.cardConfig();
+  let encrypt_wasm;
+  let encrypt_zkey;
   if (cardConfig == 0) {
-    (encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm.5")),
-      (encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey.5"));
+    encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm.5");
+    encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey.5");
   } else if (cardConfig == 1) {
-    (encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm.30")),
-      (encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey.30"));
+    encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm.30");
+    encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey.30");
   } else if (cardConfig == 2) {
-    (encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm")),
-      (encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey"));
+    encrypt_wasm = resolve(P0X_DIR, "./wasm/encrypt.wasm");
+    encrypt_zkey = resolve(P0X_DIR, "./zkey/encrypt.zkey");
   }
 
+  console.log(encrypt_wasm, encrypt_zkey);
   // Alice init shuffle
   const aliceShuffle = await ZKShuffle.create(
     shuffle.address,
@@ -62,33 +63,33 @@ async function fullprocess() {
   );
 
   // Alice create game
-  const creatorTx = await hs
+  const creatorTx = await mw
     .connect(Alice)
     .createShuffleForCreator(aliceShuffle.pk[0], aliceShuffle.pk[1]);
   const creatorEvent = await creatorTx.wait().then((receipt: any) => {
     for (const event of receipt.events) {
-      if (event.topics[0] == hs.filters.CreateGame(null, null).topics) {
+      if (event.topics[0] == mw.filters.CreateGame(null, null).topics) {
         return event.args;
       }
     }
   });
-  const hsId = Number(creatorEvent.hsId);
+  const mwId = Number(creatorEvent.mwId);
   const shuffleId1 = Number(creatorEvent.shuffleId);
 
   // Bob join the game
-  const joinerTx = await hs
+  const joinerTx = await mw
     .connect(Bob)
-    .createShuffleForJoiner(hsId, bobShuffle.pk[0], bobShuffle.pk[1]);
+    .createShuffleForJoiner(mwId, bobShuffle.pk[0], bobShuffle.pk[1]);
   const joinerEvent = await joinerTx.wait().then((receipt: any) => {
     for (const event of receipt.events) {
-      if (event.topics[0] == hs.filters.JoinGame(null, null, null).topics) {
+      if (event.topics[0] == mw.filters.JoinGame(null, null, null).topics) {
         return event.args;
       }
     }
   });
   const shuffleId2 = Number(joinerEvent.shuffleId);
   console.log(
-    `Alice Creates the game, and Bob joins the game, hsId is ${hsId}, shuffleId1 is ${shuffleId1}, shuffleId2 is ${shuffleId2}`
+    `Alice Creates the game, and Bob joins the game, mwId is ${mwId}, shuffleId1 is ${shuffleId1}, shuffleId2 is ${shuffleId2}`
   );
 
   // Alice shuffle the fist deck
@@ -117,7 +118,7 @@ async function fullprocess() {
 
   // start the game, the game will end in 10 rounds
   for (let i = 0; i < 10; i++) {
-    await hs.connect(Alice).chooseCard(hsId, 0, i);
+    await mw.connect(Alice).chooseCard(mwId, 0, i);
     console.log(`In the round ${i + 1}, Alice choose No.${i + 1} card`);
 
     const aliceCard = await aliceShuffle.open(shuffleId1, [i]);
@@ -129,8 +130,8 @@ async function fullprocess() {
       )}`
     );
 
-    let endGameFilter = hs.filters.EndGame(hsId, null, null);
-    let events = await hs.queryFilter(endGameFilter, 0, "latest");
+    let endGameFilter = mw.filters.EndGame(mwId, null, null);
+    let events = await mw.queryFilter(endGameFilter, 0, "latest");
     for (let i = 0; i < events.length; i++) {
       const e = events[i];
       const winner = e.args.playerIdx.toNumber() == 0 ? "Alice" : "Bob";
@@ -138,7 +139,7 @@ async function fullprocess() {
       return;
     }
 
-    await hs.connect(Bob).chooseCard(hsId, 1, i);
+    await mw.connect(Bob).chooseCard(mwId, 1, i);
     console.log(`In the round ${i + 1}, Bob choose No.${i + 1} card`);
 
     const bobCard = await bobShuffle.open(shuffleId2, [i]);
@@ -150,13 +151,13 @@ async function fullprocess() {
       )}`
     );
 
-    const game = await hs.getGameInfo(hsId);
+    const game = await mw.getGameInfo(mwId);
     console.log(
       `after this round, Alice's health is ${game.health[0]}, Bob's health is ${game.health[1]}`
     );
 
-    endGameFilter = hs.filters.EndGame(hsId, null, null);
-    events = await hs.queryFilter(endGameFilter, 0, "latest");
+    endGameFilter = mw.filters.EndGame(mwId, null, null);
+    events = await mw.queryFilter(endGameFilter, 0, "latest");
     for (let i = 0; i < events.length; i++) {
       const e = events[i];
       const winner = e.args.playerIdx.toNumber() == 0 ? "Alice" : "Bob";
@@ -181,7 +182,7 @@ function getRole(cardValue: number) {
   }
 }
 
-describe("hs test", function () {
+describe("mw test", function () {
   it("MagicWorld", async () => {
     await fullprocess();
   });
