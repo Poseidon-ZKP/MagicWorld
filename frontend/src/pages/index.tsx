@@ -37,7 +37,7 @@ export default function Home() {
   });
 
   const {
-    hsId,
+    mwId,
     creatorShuffleId,
     creatorList,
     joinerList,
@@ -172,7 +172,7 @@ export default function Home() {
                     item.index === selectCreatorCard
                   }
                   onClickBack={() => {
-                    chooseCardStatus.run(hsId, Turn.Creator, item.index);
+                    chooseCardStatus.run(mwId, Turn.Creator, item.index);
                     setSelectCreatorCard(item.index);
                   }}
                 />
@@ -211,7 +211,7 @@ export default function Home() {
                   isSuccess={joinGameStatus.isSuccess}
                   isLoading={joinGameStatus.isLoading}
                   onClick={() => {
-                    joinGameStatus.run(hsId, zkShuffle.pk[0], zkShuffle.pk[1]);
+                    joinGameStatus.run(mwId, zkShuffle.pk[0], zkShuffle.pk[1]);
                   }}
                 >
                   Join
@@ -407,7 +407,7 @@ export default function Home() {
                   }
                   onClickBack={() => {
                     try {
-                      chooseCardStatus.run(hsId, Turn.Joiner, item.index);
+                      chooseCardStatus.run(mwId, Turn.Joiner, item.index);
                       setSelectJoinerCard(item.index);
                     } catch (error) {
                       console.log("error", error);

@@ -2,7 +2,7 @@ import { arbitrumGoerli } from "wagmi/chains";
 
 export const config = {
   [arbitrumGoerli.id]: {
-    SHUFFLE: "0x4002dEe855e455C4765E8bC27906a8Ef350E7B24",
-    MagicWorld: "0xC73D6885B8aEB5b2AEA8bE3cD98b859050E7F344",
+    SHUFFLE: "0x52009587F3d82482E417D604a1fc48C64Dc8F4F9",
+    MagicWorld: "0x964927c494d11255d8C4FC85FCB3fc923E2264B5",
   },
 };
