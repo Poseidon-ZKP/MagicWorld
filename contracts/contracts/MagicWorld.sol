@@ -2,8 +2,8 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-import "@poseidon-zkp/poseidon-zk-contracts/contracts/shuffle/IBaseGame.sol";
-import "@poseidon-zkp/poseidon-zk-contracts/contracts/shuffle/IShuffleStateManager.sol";
+import "@zkshuffle/contracts/contracts/shuffle/IBaseGame.sol";
+import "@zkshuffle/contracts/contracts/shuffle/IShuffleStateManager.sol";
 
 struct MagicCard {
     uint256 attack;

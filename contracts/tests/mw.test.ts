@@ -1,10 +1,10 @@
 import { ethers } from "hardhat";
-import { ZKShuffle } from "@poseidon-zkp/poseidon-zk-jssdk";
+import { ZKShuffle } from "@zkshuffle/jssdk";
 import { IShuffleStateManager } from "../types/@poseidon-zkp/poseidon-zk-contracts/contracts/shuffle/IShuffleStateManager";
-import { deploy_shuffle_manager } from "@poseidon-zkp/poseidon-zk-contracts/dist/helper/deploy";
+import { deploy_shuffle_manager } from "./helper/deploy_shuffle";
 import { MagicWorld } from "../types/artifacts/cache/solpp-generated-contracts";
 import { MagicWorld__factory } from "../types/factories/artifacts/cache/solpp-generated-contracts/MagicWorld__factory";
-import { P0X_DIR } from "@poseidon-zkp/poseidon-zk-jssdk";
+import { P0X_DIR } from "@zkshuffle/jssdk";
 import { resolve } from "path";
 
 async function fullprocess() {
