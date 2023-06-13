@@ -23,7 +23,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@zkshuffle/contracts": "0.0.1",
-    "@zkshuffle/jssdk": "0.0.1"
+    "@zk-shuffle/contracts": "1.0.0",
+    "@zk-shuffle/jssdk": "1.0.0"
   }
 }
