@@ -1,11 +1,10 @@
-import { ReactNode, createContext, useEffect, useState } from 'react';
-// import useSigner from '../hooks/useSigner';
-import { ZKShuffle } from '@poseidon-zkp/poseidon-zk-jssdk';
-// import { ZKShuffle } from '../utils/shuffle/zkShuffle';
-import { dnld_crypto_files } from '../utils/shuffle/utility';
-import { useContracts } from '../hooks/useContracts';
-import { useSigner } from 'wagmi';
-import { set, get, clear } from 'idb-keyval';
+import { ReactNode, createContext, useEffect, useState } from "react";
+import { ZKShuffle } from "@zk-shuffle/jssdk";
+import { useSigner } from "wagmi";
+import { set, get, clear } from "idb-keyval";
+
+import { dnld_crypto_files } from "../utils/shuffle/utility";
+import { useContracts } from "../hooks/useContracts";
 
 export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 
@@ -39,10 +38,10 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
   const getCryptoFilesFromCache = async () => {
     const [encrypt_wasm, encrypt_zkey, decrypt_wasm, decrypt_zkey] =
       await Promise.all([
-        get('encrypt_wasm'),
-        get('encrypt_zkey'),
-        get('decrypt_wasm'),
-        get('decrypt_zkey'),
+        get("encrypt_wasm"),
+        get("encrypt_zkey"),
+        get("decrypt_wasm"),
+        get("decrypt_zkey"),
       ]);
     const isCached =
       encrypt_wasm && encrypt_zkey && decrypt_wasm && decrypt_zkey;
@@ -68,14 +67,14 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
         if (res) {
           await cacheCryptoFiles(res);
         } else {
-          console.log('get crypto files error');
+          console.log("get crypto files error");
           return;
         }
       }
       const shuffleParams = data || res;
-      let seed = await get('sk');
+      let seed = await get("sk");
       seed = seed || (await ZKShuffle.generateShuffleSecret());
-
+      debugger;
       const zkShuffle = await ZKShuffle.create(
         curChainConfig.SHUFFLE,
         signer,
@@ -85,9 +84,10 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
         shuffleParams.encrypt_wasm,
         shuffleParams.encrypt_zkey
       );
+
       setZkShuffle(zkShuffle);
     } catch (error) {
-      console.log('error', error);
+      console.log("error", error);
     }
   };
 

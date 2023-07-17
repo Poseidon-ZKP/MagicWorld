@@ -1,15 +1,17 @@
-import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
-import React, { useContext, useState } from 'react';
-import { useRouter } from 'next/router';
-import { arbitrumGoerli } from 'wagmi/chains';
+import { useAccount, useConnect, useNetwork, useSwitchNetwork } from "wagmi";
+import React, { useContext, useState } from "react";
+import { useRouter } from "next/router";
+import { arbitrumGoerli } from "wagmi/chains";
 
-import useGame, { IGameStatus, Turn } from '../hooks/useGame';
-import { ZKShuffleContext } from '../contexts/ZKShuffle';
-import Button from '../components/Button';
-import Card, { cardConfig } from '../components/Card';
-import { mockUser1, mockUser2 } from '../config/asset';
+import useGame, { IGameStatus, Turn } from "../hooks/useGame";
+import { ZKShuffleContext } from "../contexts/ZKShuffle";
+import Button from "../components/Button";
+import Card, { cardConfig } from "../components/Card";
+import { mockUser1, mockUser2 } from "../config/asset";
 
-import styles from '../styles/Home.module.css';
+import styles from "../styles/Home.module.css";
+import { ethers } from "ethers";
+import { mantaTest } from "../config/chains";
 
 export default function Home() {
   const { connect, connectors } = useConnect();
@@ -24,7 +26,7 @@ export default function Home() {
 
   const { zkShuffle, isLoaded } = useContext(ZKShuffleContext);
   const { switchNetwork } = useSwitchNetwork({
-    chainId: arbitrumGoerli.id,
+    chainId: mantaTest.id,
   });
 
   const {
@@ -80,11 +82,11 @@ export default function Home() {
     );
   }
 
-  if (chain?.id !== arbitrumGoerli.id) {
+  if (chain?.id !== mantaTest.id) {
     return (
       <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
         <div className="text-2xl font-medium">
-          Only support Arbitrum Goerli test network now
+          Only support Manta test network now
         </div>
         <div
           onClick={() => {
@@ -96,7 +98,7 @@ export default function Home() {
           }}
           className="px-6 py-2 text-base font-medium rounded-lg bg-slate-100 text-slate-900  text-center cursor-pointer dark:bg-slate-600 dark:text-slate-400 dark:highlight-white/10 hover:opacity-70"
         >
-          Switch to Arbitrum Goerli test
+          Switch to Manta test
         </div>
       </div>
     );
@@ -106,6 +108,24 @@ export default function Home() {
     return (
       <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
         <div className="text-2xl font-medium">Loading zk resource ....</div>
+      </div>
+    );
+  }
+
+  if (!ethers.utils.isAddress(creator) || !ethers.utils.isAddress(joiner)) {
+    return (
+      <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
+        <div className="text-2xl font-medium">
+          Please add user addresses on url
+        </div>
+      </div>
+    );
+  }
+
+  if (creator !== address && joiner !== address) {
+    return (
+      <div className=" flex flex-col gap-10  h-screen items-center justify-center  text-2xl font-medium bg-slate-900 ">
+        <div className="text-2xl font-medium">this is not your game</div>
       </div>
     );
   }
@@ -141,7 +161,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{'jacob.eth'}
+                address:{"jacob.eth"}
               </div>
             </div>
           </div>
@@ -176,9 +196,7 @@ export default function Home() {
           <div className="flex w-full h-0.5  bg-amber-950 justify-center flex-row "></div>
           {winner ? (
             <div className="text-3xl font-medium text-gray-200 shrink-0 ml-2 mr-2">
-              {winner?.[2]?.toString() == Turn.Creator
-                ? 'jacob.eth'
-                : 'click.eth'}{' '}
+              {winner == creator ? "jacob.eth" : "click.eth"}
               won!
             </div>
           ) : (
@@ -222,7 +240,7 @@ export default function Home() {
                           Number(creatorShuffleId)
                         );
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -238,7 +256,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -254,7 +272,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         batchDrawStatus.mutateAsync(batchShuffleId);
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -276,7 +294,7 @@ export default function Home() {
                           Number(creatorShuffleId)
                         );
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -292,7 +310,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -308,7 +326,7 @@ export default function Home() {
                         // zkShuffle?.joinGame(creatorShuffleId);
                         batchDrawStatus.mutateAsync(batchShuffleId);
                       } catch (error) {
-                        console.log('error', error);
+                        console.log("error", error);
                       }
                     }}
                   >
@@ -328,7 +346,7 @@ export default function Home() {
                         cardIds: [userSelectCardIndex],
                       });
                     } catch (error) {
-                      console.log('error', error);
+                      console.log("error", error);
                     }
                   }}
                 >
@@ -347,7 +365,7 @@ export default function Home() {
                         cardIds: [userSelectCardIndex],
                       });
                     } catch (error) {
-                      console.log('error', error);
+                      console.log("error", error);
                     }
                   }}
                 >
@@ -364,7 +382,7 @@ export default function Home() {
                     try {
                       joinerShuffleShuffleStatus.mutateAsync(joinerShuffleId);
                     } catch (error) {
-                      console.log('error', error);
+                      console.log("error", error);
                     }
                   }}
                 >
@@ -401,7 +419,7 @@ export default function Home() {
                       chooseCardStatus.run(hsId, Turn.Joiner, item.index);
                       setSelectJoinerCard(item.index);
                     } catch (error) {
-                      console.log('error', error);
+                      console.log("error", error);
                     }
                   }}
                 />
@@ -431,7 +449,7 @@ export default function Home() {
                 </>
               )}
               <div className="text-gray-400 text-2xl font-mono font-bold">
-                address:{'click.eth'}
+                address:{"click.eth"}
               </div>
             </div>
           </div>

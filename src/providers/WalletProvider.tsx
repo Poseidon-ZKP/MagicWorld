@@ -1,17 +1,14 @@
-import { PropsWithChildren } from 'react';
-import { publicProvider } from 'wagmi/providers/public';
-import { arbitrumGoerli } from 'wagmi/chains';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import '@rainbow-me/rainbowkit/styles.css';
-import * as allChains from 'wagmi/chains';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { infuraProvider } from 'wagmi/providers/infura';
-import { InjectedConnector } from 'wagmi/connectors/injected';
+import { PropsWithChildren } from "react";
+import { publicProvider } from "wagmi/providers/public";
+import "@rainbow-me/rainbowkit/styles.css";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { InjectedConnector } from "wagmi/connectors/injected";
+import { mantaTest } from "../config/chains";
 // import { arbitrumGoerli } from '../config/chains';
 
-export const chainsParams = [arbitrumGoerli];
+export const chainsParams = [mantaTest];
 
 const { chains, provider } = configureChains(chainsParams, [
   jsonRpcProvider({
@@ -41,11 +38,11 @@ const WalletProvider = ({ children }: PropsWithChildren) => {
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider
         theme={darkTheme({
-          accentColor: '#7b3fe4',
-          accentColorForeground: '#DABEF1',
-          borderRadius: 'small',
-          fontStack: 'system',
-          overlayBlur: 'small',
+          accentColor: "#7b3fe4",
+          accentColorForeground: "#DABEF1",
+          borderRadius: "small",
+          fontStack: "system",
+          overlayBlur: "small",
         })}
         chains={chains}
       >

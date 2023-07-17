@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@naivetester/zkholdem-sdk": "^0.0.1-alpha.10",
-    "@poseidon-zkp/poseidon-zk-jssdk": "^1.11.0",
     "@rainbow-me/rainbowkit": "^0.8.1",
     "@react-spring/web": "^9.7.2",
     "@semaphore-protocol/contracts": "^2.6.1",
@@ -21,6 +20,7 @@
     "@types/node": "18.14.2",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "@zk-shuffle/jssdk": "^1.0.0",
     "circomlibjs": "^0.1.7",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.1",
