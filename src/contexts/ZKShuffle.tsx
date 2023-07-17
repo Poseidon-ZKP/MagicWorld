@@ -1,5 +1,6 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
-import { ZKShuffle } from "@zk-shuffle/jssdk";
+// import useSigner from '../hooks/useSigner';
+import { ZKShuffle } from "../utils/shuffle/zkShuffle";
 import { useSigner } from "wagmi";
 import { set, get, clear } from "idb-keyval";
 

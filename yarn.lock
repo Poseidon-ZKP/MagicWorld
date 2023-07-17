@@ -2189,19 +2189,7 @@
     schema-utils "^3.0.0"
     source-map "^0.7.3"
 
-"@poseidon-zkp/poseidon-zk-jssdk@^1.11.0":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@poseidon-zkp/poseidon-zk-jssdk/-/poseidon-zk-jssdk-1.18.0.tgz#461e4f2b391d86d19b0e7f41e9f39074c30fde19"
-  integrity sha512-yGKN7ve527T6vrP5gI20k/PJ3Xlg+nyIRe+2GGqks7VDitcGr/nB34XdWu6xox3VMqPbjWVKn8+khE27uHUwIA==
-  dependencies:
-    "@poseidon-zkp/poseidon-zk-proof" "1.18.0"
-    "@typechain/ethers-v5" "^10.1.1"
-    axios "^1.4.0"
-    circomlibjs "^0.1.7"
-    ethers "^5.7.2"
-    patch-package "^7.0.0"
-
-"@poseidon-zkp/poseidon-zk-proof@1.18.0":
+"@poseidon-zkp/poseidon-zk-proof@^1.18.0":
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/@poseidon-zkp/poseidon-zk-proof/-/poseidon-zk-proof-1.18.0.tgz#a219db8dff1055c7cd55ab8d574ad3265649fd4d"
   integrity sha512-BzkDE4aXhczrMWdG//dwDhKxzbK5OPq5evuCZG7Uq43tRNY5NfqCP8f9Rrf81NL2qgyYg7+uGOozNxQkocdZ8A==
