@@ -1,4 +1,4 @@
-import { ethers, providers } from 'ethers';
+import { ethers, providers } from "ethers";
 
 export const getLogParams = async ({
   filter,
@@ -9,8 +9,8 @@ export const getLogParams = async ({
   address?: string;
   provider?: any;
 }) => {
-  const fromBlock = (await provider?.getBlockNumber()) - 50;
-  const toBlock = 'latest';
+  const fromBlock = (await provider?.getBlockNumber()) - 20;
+  const toBlock = "latest";
   return {
     address,
     fromBlock,

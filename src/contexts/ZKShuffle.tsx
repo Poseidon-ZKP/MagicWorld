@@ -74,7 +74,6 @@ export function ZKShuffleProvider({ children }: { children: ReactNode }) {
       const shuffleParams = data || res;
       let seed = await get("sk");
       seed = seed || (await ZKShuffle.generateShuffleSecret());
-      debugger;
       const zkShuffle = await ZKShuffle.create(
         curChainConfig.SHUFFLE,
         signer,

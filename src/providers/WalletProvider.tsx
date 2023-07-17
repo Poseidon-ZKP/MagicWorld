@@ -11,11 +11,11 @@ import { mantaTest } from "../config/chains";
 export const chainsParams = [mantaTest];
 
 const { chains, provider } = configureChains(chainsParams, [
-  jsonRpcProvider({
-    rpc: () => ({
-      http: `https://endpoints.omniatech.io/v1/arbitrum/goerli/public`,
-    }),
-  }),
+  // jsonRpcProvider({
+  //   rpc: () => ({
+  //     http: `https://manta-testnet.calderachain.xyz/http`,
+  //   }),
+  // }),
   // alchemyProvider({ apiKey: '3G7hlGqp_3AyP4XspL_vMa5nJTpwKIxT' }),
   // infuraProvider({ apiKey: 'b45700eac1464695b569b4151c36b672' }),
   publicProvider(),

@@ -1,9 +1,9 @@
 // game ShowHand listener
 
-import { BigNumber, EventFilter, ethers } from 'ethers';
-import { useEffect, useState } from 'react';
-import { useProvider } from 'wagmi';
-import { getLogParams } from '../utils/contracts';
+import { BigNumber, EventFilter, ethers } from "ethers";
+import { useEffect, useState } from "react";
+import { useProvider } from "wagmi";
+import { getLogParams } from "../utils/contracts";
 
 export interface UseEventProps {
   contract: any;
@@ -30,6 +30,7 @@ function useEvent({
   others: { creator, joiner, gameId },
 }: UseEventProps) {
   const provider = useProvider();
+
   const [creatorValue, setCreatorValue] = useState<any>();
   const [joinerValue, setJoinerValue] = useState<any>();
 
@@ -40,7 +41,6 @@ function useEvent({
 
   const listener = async (...args: any[]) => {
     try {
-      console.log('args', args);
       if (args[addressIndex] === creator) {
         setCreatorValue(args);
       } else if (args[addressIndex] === joiner) {
@@ -63,7 +63,9 @@ function useEvent({
             provider: provider,
           })
         );
+        console.log("logs", logs);
         logs.forEach((log: any) => {
+          console.log("logs", logs);
           const event = contract.interface.parseLog(log);
           listener(...event.args);
         });

@@ -42,7 +42,16 @@ export const mantaTest: Chain = {
       http: ["https://manta-testnet.calderachain.xyz/http"],
     },
   },
-
+  blockExplorers: {
+    etherscan: {
+      name: "manta-testnet",
+      url: "https://manta-testnet.calderaexplorer.xyz",
+    },
+    default: {
+      name: "manta-testnet",
+      url: "https://manta-testnet.calderaexplorer.xyz",
+    },
+  },
   testnet: true,
 };
 
