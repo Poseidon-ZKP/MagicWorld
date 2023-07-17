@@ -9,7 +9,7 @@ export const getLogParams = async ({
   address?: string;
   provider?: any;
 }) => {
-  const fromBlock = (await provider?.getBlockNumber()) - 20;
+  const fromBlock = (await provider?.getBlockNumber()) - 10;
   const toBlock = "latest";
   return {
     address,

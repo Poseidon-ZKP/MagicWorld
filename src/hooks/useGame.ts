@@ -28,7 +28,7 @@ export enum Turn {
   Joiner,
 }
 
-export const BLOCK_INTERVAL = 150;
+export const BLOCK_INTERVAL = 10;
 
 function useGame(creator: string, joiner: string, address: string) {
   const { hs } = useContracts();
@@ -185,6 +185,8 @@ function useGame(creator: string, joiner: string, address: string) {
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
+  console.log("creatorShuffleStatus", creatorShuffleStatus);
+  console.log("joinerShuffleStatus", joinerShuffleStatus);
   const getGameInfo = async () => {
     try {
       const res = await hs?.getGameInfo(hsId);

@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
-import Button from '../components/Button';
-import { ZKShuffleContext } from '../contexts/ZKShuffle';
+import React, { useContext } from "react";
+import Button from "../components/Button";
+import { ZKShuffleContext } from "../contexts/ZKShuffle";
 
 function Test() {
   const { clearCache } = useContext(ZKShuffleContext);
@@ -9,7 +9,9 @@ function Test() {
       onClick={() => {
         clearCache();
       }}
-    ></Button>
+    >
+      clear cache
+    </Button>
   );
 }
 
