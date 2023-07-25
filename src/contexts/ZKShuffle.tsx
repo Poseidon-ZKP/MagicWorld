@@ -1,10 +1,9 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
-// import useSigner from '../hooks/useSigner';
-import { ZKShuffle } from "../utils/shuffle/zkShuffle";
+
+import { ZKShuffle, dnld_crypto_files } from "@zk-shuffle/jssdk";
 import { useSigner } from "wagmi";
 import { set, get, clear } from "idb-keyval";
 
-import { dnld_crypto_files } from "../utils/shuffle/utility";
 import { useContracts } from "../hooks/useContracts";
 
 export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;

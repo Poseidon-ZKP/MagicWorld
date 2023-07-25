@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import cloneDeep from "lodash/cloneDeep";
 import { useProvider } from "wagmi";
+import { GameTurn } from "@zk-shuffle/jssdk";
 
 import { useContracts } from "./useContracts";
 import { UnwrapPromise, ZKShuffleContext } from "../contexts/ZKShuffle";
 import useEvent, { PULL_DATA_TIME } from "./useEvent";
-import { GameTurn } from "../utils/shuffle/zkShuffle";
 import { initList, list } from "../components/Card";
 import { useWrites } from "./useWrites";
 
@@ -71,17 +71,14 @@ function useGame(creator: string, joiner: string, address: string) {
       joiner: joiner,
     },
   });
-  console.log("gameStatus", gameStatus);
   const joinGameListener = useEvent({
     contract: hs,
     filter: hs?.filters?.JoinGame(null, null, null),
     isStop: gameStatus !== IGameStatus.CREATED,
-    // isStop: true,
     addressIndex: 2,
     others: {
       creator: creator,
       joiner: joiner,
-      // gameId,
     },
   });
 
@@ -185,8 +182,6 @@ function useGame(creator: string, joiner: string, address: string) {
     };
   }, [creatorShuffleStatus, joinerShuffleStatus]);
 
-  console.log("creatorShuffleStatus", creatorShuffleStatus);
-  console.log("joinerShuffleStatus", joinerShuffleStatus);
   const getGameInfo = async () => {
     try {
       const res = await hs?.getGameInfo(hsId);
@@ -312,11 +307,8 @@ function useGame(creator: string, joiner: string, address: string) {
   useEffect(() => {
     if (creatorShuffleId) {
       setInterval(async () => {
-        // console.log('blockNumber', blockNumber);
         const startBlock = (await provider.getBlockNumber()) - BLOCK_INTERVAL;
-
         const res = await zkShuffle.checkTurn(creatorShuffleId, startBlock);
-        console.log("first deck checkTurn", res);
         if (res !== GameTurn.NOP) {
           setCreatorShuffleStatus(res);
         }
@@ -329,7 +321,6 @@ function useGame(creator: string, joiner: string, address: string) {
       setInterval(async () => {
         const startBlock = (await provider.getBlockNumber()) - BLOCK_INTERVAL;
         const res = await zkShuffle.checkTurn(joinerShuffleId, startBlock);
-        console.log("second deck checkTurn", res);
         if (res !== GameTurn.NOP) {
           setJoinerShuffleStatus(res);
         }
